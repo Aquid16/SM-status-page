@@ -26,17 +26,19 @@ RUN chown -R status-page:status-page /opt/status-page/
 RUN pip install --upgrade pip  
  
 # Copy the Django project to the container
-COPY status-page/* /opt/status-page/
+ADD status-page /opt/status-page/
+
+# Grant execute permissions to upgrade.sh
+RUN chmod +x /opt/status-page/upgrade.sh
 
 # Install Python dependencies
 RUN python -m venv /opt/status-page/venv \
-    && source /opt/status-page/venv/bin/activate \
-    && pip install --no-cache-dir -r requirements.txt
+    && /opt/status-page/venv/bin/pip install --no-cache-dir -r requirements.txt
 
 # Upgrade and initialize application
-RUN /opt/status-page/upgrade.sh \
-    && source /opt/status-page/venv/bin/activate \
-    && python manage.py createsuperuser --noinput
+RUN /opt/status-page/upgrade.sh 
+RUN /opt/status-page/venv/bin/python /opt/status-page/statuspage/manage.py migrate 
+RUN /opt/status-page/venv/bin/python /opt/status-page/statuspage/manage.py createsuperuser --noinput
 
 # Copy Gunicorn and systemd service files
 RUN cp /opt/status-page/contrib/gunicorn.py /opt/status-page/gunicorn.py \
