@@ -9,7 +9,7 @@ provider "aws" {
 # ----------------------
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "~> 3.0"
+  version = "~> 5.0"
 
   name = "sm-statuspage-vpc"
   cidr = "10.0.0.0/16"
@@ -36,7 +36,7 @@ resource "aws_route_table" "public" {
 resource "aws_route" "internet_access" {
   route_table_id         = aws_route_table.public.id
   destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = aws_internet_gateway.example.id
+  gateway_id             = aws_internet_gateway.sm-statuspage-igw.id
 }
 
 # ----------------------
@@ -51,6 +51,13 @@ resource "aws_security_group" "sm_admin_sg" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"] # Adjust for security
   }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 }
 
 resource "aws_security_group" "sm_user_sg" {
@@ -60,6 +67,13 @@ resource "aws_security_group" "sm_user_sg" {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
@@ -82,12 +96,12 @@ module "eks" {
 
   eks_managed_node_groups = {
     worker_nodes = {
-      desired_capacity = 2
-      max_capacity     = 2
-      min_capacity     = 2
+      desired_size = 2
+      max_size     = 2
+      min_size     = 2
 
       instance_types = ["t3.medium"]
-      subnet_ids     = ["10.0.3.0/24", "10.0.4.0/24"]
+      subnet_ids     = module.vpc.private_subnets
       security_groups = [aws_security_group.sm_user_sg.id]
     }
   }
@@ -110,7 +124,7 @@ module "rds" {
   password = "abcdefgh123456"
   publicly_accessible = false
   vpc_security_group_ids = [aws_security_group.sm_admin_sg.id]
-  subnet_ids = ["10.0.3.0/24"]
+  subnet_ids = module.vpc.private_subnets
 }
 
 
