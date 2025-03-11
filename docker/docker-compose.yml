@@ -1,0 +1,70 @@
+version: '3.9'
+
+services:
+  # PostgreSQL service
+  db:
+    image: postgres:15
+    container_name: status-page-db
+    environment:
+      POSTGRES_USER: status-page
+      POSTGRES_PASSWORD: abcdefgh123456
+      POSTGRES_DB: status-page
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U status-page -d status-page"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - status_page_network
+    expose:
+      - "5432"
+
+  # Redis service
+  redis:
+    image: redis:6
+    container_name: status-page-redis
+    hostname: redis_host
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - status_page_network
+    expose:
+      - "6379"
+
+  # Django service
+  django:
+    build: ./statuspage
+    container_name: status-page-django
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    expose:
+      - "8001"
+    networks:
+      - status_page_network
+
+  # Nginx service
+  nginx:
+    build: .
+    container_name: status-page-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - django
+    networks:
+      - status_page_network
+
+volumes:
+  postgres_data:
+
+networks:
+  status_page_network:
+    driver: bridge
