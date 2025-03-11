@@ -23,7 +23,20 @@ module "vpc" {
   enable_vpn_gateway   = false
   enable_dns_hostnames = true
   enable_dns_support   = true
-  enable_internet_gateway = true
+}
+
+resource "aws_internet_gateway" "sm-statuspage-igw" {
+  vpc_id = module.vpc.vpc_id
+}
+
+resource "aws_route_table" "public" {
+  vpc_id = module.vpc.vpc_id
+}
+
+resource "aws_route" "internet_access" {
+  route_table_id         = aws_route_table.public.id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = aws_internet_gateway.example.id
 }
 
 # ----------------------
@@ -65,9 +78,9 @@ module "eks" {
   subnet_ids = module.vpc.private_subnets
 
   enable_irsa = true
-  cluster_security_group_id = aws_security_group.admin_sg.id
+  cluster_security_group_id = aws_security_group.sm_admin_sg.id
 
-  node_groups = {
+  eks_managed_node_groups = {
     worker_nodes = {
       desired_capacity = 2
       max_capacity     = 2
@@ -95,9 +108,8 @@ module "rds" {
 
   username = "statuspage"
   password = "abcdefgh123456"
-
   publicly_accessible = false
-  vpc_security_group_ids = [aws_security_group.admin_sg.id]
+  vpc_security_group_ids = [aws_security_group.sm_admin_sg.id]
   subnet_ids = ["10.0.3.0/24"]
 }
 
