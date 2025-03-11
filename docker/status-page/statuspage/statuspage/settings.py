@@ -82,12 +82,12 @@ for param in PARAMS:
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': DATABASE.get('NAME'),
-        'USER': DATABASE.get('USER'),
+        'NAME': DATABASE.get('NAME', 'status-page'),
+        'USER': DATABASE.get('USER', 'status-page'),
         'PASSWORD': DATABASE.get('PASSWORD'),
         'HOST': DATABASE.get('HOST'),
         'PORT': DATABASE.get('PORT'),
-        'CONN_MAX_AGE': DATABASE.get('CONN_MAX_AGE'),
+        'CONN_MAX_AGE': DATABASE.get('CONN_MAX_AGE',300),
     },
 }
 
@@ -96,7 +96,7 @@ if 'tasks' not in REDIS:
         "REDIS section in configuration.py is missing the 'tasks' subsection."
     )
 TASKS_REDIS = REDIS['tasks']
-TASKS_REDIS_HOST = TASKS_REDIS.get('HOST', 'localhost')
+TASKS_REDIS_HOST = TASKS_REDIS.get('HOST')
 TASKS_REDIS_PORT = TASKS_REDIS.get('PORT', 6379)
 TASKS_REDIS_SENTINELS = TASKS_REDIS.get('SENTINELS', [])
 TASKS_REDIS_USING_SENTINEL = all([
