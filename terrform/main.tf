@@ -83,7 +83,7 @@ resource "aws_security_group" "sm_user_sg" {
 # ----------------------
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "~> 19.0"
+  version = "~> 20.0"
 
   cluster_name    = "sm-statuspage-eks"
   cluster_version = "1.27"
@@ -125,6 +125,8 @@ module "rds" {
   publicly_accessible = false
   vpc_security_group_ids = [aws_security_group.sm_admin_sg.id]
   subnet_ids = module.vpc.private_subnets
+
+  family = "postgres14"
 }
 
 
