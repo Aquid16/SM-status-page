@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   # PostgreSQL service
   db:
@@ -40,13 +38,32 @@ services:
   django:
     build: ./statuspage
     container_name: status-page-django
+    volumes:
+      - status-page-venv:/opt/status-page/venv
+      - static_files:/opt/status-page/static
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
-    expose:
-      - "8001"
+    environment:
+      - DATABASE_NAME=status-page
+      - DATABASE_USER=status-page
+      - DATABASE_PASSWORD=abcdefgh123456
+      - DATABASE_HOST=db
+      - DATABASE_PORT=5432
+      - REDIS_HOST=redis_host
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=""
+      - REDIS_TASKS_DB=0
+      - REDIS_CACHING_DB=1
+      - ALLOWED_HOSTS="*" 
+      - SECRET_KEY=Pv)hkWbYxkpaD_dh$ULGa6MF#ADn6&=MU&#v5cjRyViuTbPHuG
+      - DJANGO_SUPERUSER_USERNAME=admin
+      - DJANGO_SUPERUSER_PASSWORD=admin123
+      - DJANGO_SUPERUSER_EMAIL=admin@example.com
+    ports:
+      - "8000:8000"
     networks:
       - status_page_network
 
@@ -57,6 +74,8 @@ services:
     ports:
       - "80:80"
       - "443:443"
+    volumes:
+      - static_files:/opt/status-page/static
     depends_on:
       - django
     networks:
@@ -64,6 +83,8 @@ services:
 
 volumes:
   postgres_data:
+  status-page-venv:
+  static_files:
 
 networks:
   status_page_network:
