@@ -1,5 +1,16 @@
 apiVersion: v2
 name: status-page-stack
 description: A Helm chart for Status-Page application
+type: application
 version: 0.1.0
 appVersion: "1.16.0"
+dependencies:
+  # NGINX Ingress Controller dependency for Ingress exposure
+  - name: ingress-nginx
+    repository: "https://kubernetes.github.io/ingress-nginx"
+    version: "4.10.1"
+
+  # Prometheus and Grafana stack dependency for monitoring
+  - name: kube-prometheus-stack
+    repository: "https://prometheus-community.github.io/helm-charts"
+    version: "45.0.0"
