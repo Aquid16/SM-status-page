@@ -40,7 +40,8 @@ services:
     container_name: status-page-django
     volumes:
       - status-page-venv:/opt/status-page/venv
-      - static_files:/opt/status-page/static
+      - static_files:/opt/status-page/statuspage/static
+    restart: no
     depends_on:
       db:
         condition: service_healthy
@@ -62,8 +63,8 @@ services:
       - DJANGO_SUPERUSER_USERNAME=admin
       - DJANGO_SUPERUSER_PASSWORD=admin123
       - DJANGO_SUPERUSER_EMAIL=admin@example.com
-    ports:
-      - "8000:8000"
+#    ports:
+#      - "8000:8000"
     networks:
       - status_page_network
 
@@ -75,7 +76,7 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - static_files:/opt/status-page/static
+      - static_files:/opt/status-page/statuspage/static
     depends_on:
       - django
     networks:
