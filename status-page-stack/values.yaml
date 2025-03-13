@@ -11,8 +11,6 @@ redis:
     interval: "10s"
     timeout: "5s"
     retries: 5
-  storage:
-    size: 1Gi
 
 # Django
 django:
@@ -31,7 +29,7 @@ django:
     REDIS_PASSWORD: ""
     REDIS_TASKS_DB: "0"
     REDIS_CACHING_DB: "1"
-    ALLOWED_HOSTS: "*"
+    ALLOWED_HOSTS: "0.0.0.0"
     SECRET_KEY: Pv)hkWbYxkpaD_dh$ULGa6MF#ADn6&=MU&#v5cjRyViuTbPHuG
     DJANGO_SUPERUSER_USERNAME: admin
     DJANGO_SUPERUSER_PASSWORD: admin123
@@ -47,7 +45,9 @@ nginx:
 
 # Volumes
 volumes:
-  status-page-venv:
-    size: 1Gi
+  status_page_venv:
+    size: 3Gi
   static_files:
+    size: 1Gi
+  redis_data:
     size: 1Gi
