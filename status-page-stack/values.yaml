@@ -1,0 +1,50 @@
+# Redis
+redis:
+  image: redis:6
+  port: 6379
+  replicas: 2  # HA 
+  healthcheck:
+    test: ["CMD", "redis-cli", "ping"]
+    interval: "10s"
+    timeout: "5s"
+    retries: 5
+  storage:
+    size: 1Gi
+
+# Django
+django:
+  image: status-page-django
+  build:
+    context: ./statuspage
+  replicas: 2  # HA 
+  env:
+    DATABASE_NAME: statuspage
+    DATABASE_USER: statuspage
+    DATABASE_PASSWORD: abcdefgh123456
+    DATABASE_HOST: sm-statuspage-postgresql.cx248m4we6k7.us-east-1.rds.amazonaws.com
+    DATABASE_PORT: "5432"
+    REDIS_HOST: redis-host
+    REDIS_PORT: "6379"
+    REDIS_PASSWORD: ""
+    REDIS_TASKS_DB: "0"
+    REDIS_CACHING_DB: "1"
+    ALLOWED_HOSTS: "*"
+    SECRET_KEY: Pv)hkWbYxkpaD_dh$ULGa6MF#ADn6&=MU&#v5cjRyViuTbPHuG
+    DJANGO_SUPERUSER_USERNAME: admin
+    DJANGO_SUPERUSER_PASSWORD: admin123
+    DJANGO_SUPERUSER_EMAIL: admin@example.com
+
+# Nginx
+nginx:
+  image: nginx:alpine
+  replicas: 2  # HA 
+  ports:
+    http: 80
+    https: 443
+
+# Volumes
+volumes:
+  status-page-venv:
+    size: 1Gi
+  static_files:
+    size: 1Gi
