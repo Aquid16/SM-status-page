@@ -1,4 +1,31 @@
-.terraform/
+# Terraform state files
+terraform.tfstate
+terraform.tfstate.backup
+*.tfstate
+*.tfstate.*
+
+# Terraform plan files
+*.tfplan
+
+# Terraform variables file with sensitive data
+terraform.tfvars
+
+# Terraform lock file
 .terraform.lock.hcl
-.terraform.tfstate
-.terraform.tfstate.backup
+
+# Terraform working directory
+.terraform/
+
+# Crash logs
+crash.log
+
+# Local environment files
+*.env
+
+# Editor backup files
+*~
+*.swp
+*.swo
+
+# macOS-specific files
+.DS_Store
