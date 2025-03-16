@@ -33,6 +33,8 @@ spec:
         envFrom:
         - configMapRef:
             name: django-config
+        - secretRef:
+            name: django-secret
         volumeMounts:
         - name: status-page-venv
           mountPath: /opt/status-page/venv
