@@ -4,7 +4,7 @@
 resource "aws_security_group" "admin_sg" {
   vpc_id = var.vpc_id
   name   = "sm-admin-sg"
-
+  
   ingress {
     from_port   = 22
     to_port     = 22

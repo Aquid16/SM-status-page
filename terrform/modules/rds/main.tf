@@ -1,6 +1,14 @@
 # -----------------------------------
 # RDS Database Module
 # -----------------------------------
+resource "aws_db_subnet_group" "rds_subnet_group" {
+  name       = "${var.identifier}-subnet-group"
+  subnet_ids = var.subnet_ids  # From module.vpc.private_subnets
+  tags = {
+    Name  = "${var.identifier}-subnet-group"
+  }
+}
+
 module "rds" {
   source  = "terraform-aws-modules/rds/aws"
   version = "~> 5.0"
@@ -15,25 +23,13 @@ module "rds" {
   username            = var.username
   password            = var.password
   publicly_accessible = false
-  vpc_security_group_ids = var.vpc_security_group_ids
-  subnet_ids          = var.subnet_ids
+
+  vpc_security_group_ids = var.vpc_security_group_ids  
+  db_subnet_group_name   = aws_db_subnet_group.rds_subnet_group.name  
 
   family = "postgres17"
 
   tags = {
     Name  = var.identifier
   }
-}
-
-resource "null_resource" "initialize_db" {
-  provisioner "local-exec" {
-    command = <<EOT
-      psql -h ${module.rds.db_instance_endpoint} -U ${var.username} -d postgres -c "CREATE DATABASE ${var.database_name} OWNER ${var.username};"
-    EOT
-    environment = {
-      PGPASSWORD = var.password
-    }
-  }
-
-  depends_on = [module.rds]
 }
