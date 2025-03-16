@@ -14,31 +14,40 @@ module "vpc" {
 
   enable_nat_gateway   = true
   single_nat_gateway   = true
+  nat_gateway_tags = {
+    Name = "sm-statuspage-nat"
+  }
+
+  igw_tags = {
+    Name = "sm-statuspage-igw"
+  }
+
   enable_vpn_gateway   = false
   enable_dns_hostnames = true
   enable_dns_support   = true
 
+  public_subnet_tags = {
+    "Name" = "${var.vpc_name}-public"
+  }
+
+  private_subnet_tags = {
+    "Name" = "${var.vpc_name}-private"
+  }
+
+  public_route_table_tags = {
+    Name = "${var.vpc_name}-public-rt"
+  }
+
+  private_route_table_tags = {
+    Name = "${var.vpc_name}-private-rt"
+  }
+
+  manage_default_vpc = false
+  manage_default_security_group = false
+  manage_default_route_table = false
+  manage_default_network_acl = false
+
   tags = {
     Name  = var.vpc_name
   }
-}
-
-resource "aws_internet_gateway" "igw" {
-  vpc_id = module.vpc.vpc_id
-  tags = {
-    Name  = "${var.vpc_name}-igw"
-  }
-}
-
-resource "aws_route_table" "public" {
-  vpc_id = module.vpc.vpc_id
-  tags = {
-    Name  = "${var.vpc_name}-public-rt"
-  }
-}
-
-resource "aws_route" "internet_access" {
-  route_table_id         = aws_route_table.public.id
-  destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = aws_internet_gateway.igw.id
 }

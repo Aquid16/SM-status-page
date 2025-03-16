@@ -1,5 +1,5 @@
-# AWS region
-aws_region          = "us-east-1"
+# AWS Region
+aws_region 	    = "us-east-1"
 
 # VPC Module Variables
 vpc_name            = "sm-statuspage-vpc"
