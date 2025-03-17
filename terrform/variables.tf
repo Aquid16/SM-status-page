@@ -69,6 +69,10 @@ variable "node_instance_types" {
   type        = list(string)
 }
 
+variable "principal_arns" {
+  type = list(string)
+}
+
 variable "rds_identifier" {
   description = "Identifier for the RDS instance"
   type        = string

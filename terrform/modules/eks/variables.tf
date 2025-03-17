@@ -28,6 +28,16 @@ variable "user_sg_id" {
   type        = string
 }
 
+variable "iam_role_arn" {
+  description = "ARN of the IAM role for the EKS cluster"
+  type        = string
+}
+
+variable "node_group_role_arn" {
+  description = "ARN of the IAM role for the EKS node group"
+  type        = string
+}
+
 variable "desired_size" {
   description = "Desired number of nodes in the EKS node group"
   type        = number

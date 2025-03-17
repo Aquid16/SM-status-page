@@ -15,6 +15,7 @@ module "eks" {
 
   cluster_security_group_id = var.admin_sg_id
   create_cluster_security_group = false
+  iam_role_arn = var.iam_role_arn
 
   eks_managed_node_groups = {
     sm_worker_nodes = {
@@ -25,6 +26,7 @@ module "eks" {
       instance_types = var.instance_types
       subnet_ids     = var.subnet_ids
       additional_security_group_ids = [var.user_sg_id]
+      iam_role_arn = var.node_group_role_arn
     }
   }
 

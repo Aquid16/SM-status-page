@@ -13,11 +13,16 @@ private_subnets_cidr_blocks = ["10.0.3.0/24", "10.0.4.0/24"]
 
 # EKS Module Variables
 cluster_name        = "sm-statuspage-eks"
-cluster_version     = "1.27"
+cluster_version     = "1.29"
 node_group_desired_size = 2
 node_group_max_size     = 2
 node_group_min_size     = 2
 node_instance_types     = ["t3.medium"]
+
+principal_arns      = [
+  "arn:aws:iam::992382545251:user/meitaltal",
+  "arn:aws:iam::992382545251:user/SharonSinelnikov"
+]
 
 # RDS Module Variables
 rds_identifier      = "sm-statuspage-postgresql"
