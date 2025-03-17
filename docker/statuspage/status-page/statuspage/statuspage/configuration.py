@@ -2,6 +2,8 @@
 # Required Settings
 #
 
+import os
+
 # This is a list of valid fully-qualified domain names (FQDNs) for the Status-Page server. Status-Page will not permit
 # write access to the server via any other hostnames. The first FQDN in the list will be treated as the preferred name.
 #
@@ -11,11 +13,11 @@ ALLOWED_HOSTS = ['*']
 # PostgreSQL database configuration. See the Django documentation for a complete list of available parameters:
 #   https://docs.djangoproject.com/en/stable/ref/settings/#databases
 DATABASE = {
-    'NAME': 'statuspage',                                                                  # Database name
-    'USER': 'statuspage',                                                                  # PostgreSQL username
-    'PASSWORD': 'abcdefgh123456',                                                          # PostgreSQL password
-    'HOST': 'sm-statuspage-postgresql.cx248m4we6k7.us-east-1.rds.amazonaws.com',           # Database server
-    'PORT': '5432',                                                                        # Database port (leave blank for default)
+    'NAME': os.environ.get('DATABASE_NAME', 'statuspage'),                                                                  # Database name
+    'USER': os.environ.get('DATABASE_USER', 'statuspage'),                                                                  # PostgreSQL username
+    'PASSWORD': os.environ.get('DATABASE_PASSWORD', 'abcdefgh123456'),                                                          # PostgreSQL password
+    'HOST': os.environ.get('DATABASE_HOST', 'sm-statuspage-postgresql.cx248m4we6k7.us-east-1.rds.amazonaws.com'),           # Database server
+    'PORT': os.environ.get('DATABASE_PORT', '5432'),                                                                        # Database port (leave blank for default)
     'CONN_MAX_AGE': 300,                                                                   # Max database connection age
 }
 
@@ -23,26 +25,26 @@ DATABASE = {
 # for each. Full connection details are required.
 REDIS = {
     'tasks': {
-        'HOST': 'redis_host',
-        'PORT': 6379,
+        'HOST': os.environ.get('REDIS_HOST', 'redis'),
+        'PORT': int(os.environ.get('REDIS_PORT', 6379)),
         # Comment out `HOST` and `PORT` lines and uncomment the following if using Redis Sentinel
         # 'SENTINELS': [('mysentinel.redis.example.com', 6379)],
         # 'SENTINEL_SERVICE': 'status-page',
         'PASSWORD': '',
-        'DATABASE': 0,
+        'DATABASE': int(os.environ.get('REDIS_TASKS_DB', 0)),
         'SSL': False,
         # Set this to True to skip TLS certificate verification
         # This can expose the connection to attacks, be careful
         # 'INSECURE_SKIP_TLS_VERIFY': False,
     },
     'caching': {
-        'HOST': 'redis_host',
-        'PORT': 6379,
+        'HOST': os.environ.get('REDIS_HOST', 'redis'),
+        'PORT': int(os.environ.get('REDIS_PORT', 6379)),
         # Comment out `HOST` and `PORT` lines and uncomment the following if using Redis Sentinel
         # 'SENTINELS': [('mysentinel.redis.example.com', 6379)],
         # 'SENTINEL_SERVICE': 'netbox',
         'PASSWORD': '',
-        'DATABASE': 1,
+        'DATABASE': int(os.environ.get('REDIS_CACHING_DB', 1)),
         'SSL': False,
         # Set this to True to skip TLS certificate verification
         # This can expose the connection to attacks, be careful
@@ -57,7 +59,7 @@ SITE_URL = ""
 # For optimal security, SECRET_KEY should be at least 50 characters in length and contain a mix of letters, numbers, and
 # symbols. Status-Page will not run without this defined. For more information, see
 # https://docs.djangoproject.com/en/stable/ref/settings/#std:setting-SECRET_KEY
-SECRET_KEY = 'Pv)hkWbYxkpaD_dh$ULGa6MF#ADn6&=MU&#v5cjRyViuTbPHuG'
+SECRET_KEY = os.environ.get('SECRET_KEY', "Pv)hkWbYxkpaD_dh$ULGa6MF#ADn6&=MU&#v5cjRyViuTbPHuG")
 
 #
 # Optional Settings

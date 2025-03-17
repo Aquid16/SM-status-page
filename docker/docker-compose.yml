@@ -23,7 +23,6 @@ services:
   redis:
     image: redis:6
     container_name: status-page-redis
-    hostname: redis_host
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -53,9 +52,8 @@ services:
       - DATABASE_PASSWORD=abcdefgh123456
       - DATABASE_HOST=sm-statuspage-postgresql.cx248m4we6k7.us-east-1.rds.amazonaws.com
       - DATABASE_PORT=5432
-      - REDIS_HOST=redis_host
+      - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - REDIS_PASSWORD=""
       - REDIS_TASKS_DB=0
       - REDIS_CACHING_DB=1
       - ALLOWED_HOSTS="*" 
