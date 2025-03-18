@@ -29,6 +29,14 @@ resource "aws_security_group" "admin_sg" {
     description = "Allow Kubernetes API access from Bastion Host"
   }
 
+  ingress {
+    from_port   = 2049
+    to_port     = 2049
+    protocol    = "tcp"
+    cidr_blocks = var.private_subnets
+    description = "Allow NFS traffic for EFS from private subnets"
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
