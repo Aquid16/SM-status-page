@@ -13,12 +13,21 @@ module "vpc" {
   private_subnets = var.private_subnets
 }
 
+# Bastion Host
+module "bastion" {
+  source = "./modules/bastion"
+  vpc_id           = module.vpc.vpc_id
+  public_subnet_id = module.vpc.public_subnets[0]
+  ssh_key_name     = var.ssh_key_name
+}
+
 # Security Groups
 module "security_groups" {
   source = "./modules/security_groups"
 
   vpc_id          = module.vpc.vpc_id
   private_subnets = var.private_subnets_cidr_blocks
+  bastion_sg_id   = module.bastion.bastion_sg_id
 }
 
 # EKS Cluster
@@ -35,13 +44,15 @@ module "eks" {
   max_size            = var.node_group_max_size
   min_size            = var.node_group_min_size
   instance_types      = var.node_instance_types
+  iam_role_arn        = var.eks_cluster_role_arn
+  node_group_role_arn = var.eks_node_group_role_arn
 }
 
 module "access_entries" {
   source = "./modules/access_entries"
-
   cluster_name   = module.eks.cluster_name
   principal_arns = var.principal_arns  
+  depends_on     = [module.eks]
 }
 
 # RDS Database
