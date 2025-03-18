@@ -21,6 +21,14 @@ resource "aws_security_group" "admin_sg" {
     description = "Allow Kubernetes API from private subnets"
   }
 
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    security_groups = [var.bastion_sg_id]
+    description = "Allow Kubernetes API access from Bastion Host"
+  }
+
   egress {
     from_port   = 0
     to_port     = 0

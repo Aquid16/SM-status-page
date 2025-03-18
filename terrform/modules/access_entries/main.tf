@@ -1,19 +1,9 @@
-variable "cluster_name" {
-  description = "Name of the EKS cluster"
-  type        = string
-}
-
-variable "principal_arns" {
-  description = "List of IAM principal ARNs to grant access"
-  type        = list(string)
-}
-
 resource "aws_eks_access_entry" "sm_user" {
   count         = length(var.principal_arns)
   cluster_name  = var.cluster_name
   principal_arn = var.principal_arns[count.index]
   type          = "STANDARD"
-  kubernetes_groups = ["system:masters"]
+  kubernetes_groups = ["eks-admins"]
 }
 
 resource "aws_eks_access_policy_association" "sm_user_admin" {

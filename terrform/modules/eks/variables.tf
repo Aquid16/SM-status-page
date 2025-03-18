@@ -47,3 +47,13 @@ variable "instance_types" {
   description = "Instance types for EKS worker nodes"
   type        = list(string)
 }
+
+variable "iam_role_arn" {
+  description = "ARN of the IAM role for the EKS cluster"
+  type        = string
+}
+
+variable "node_group_role_arn" {
+  description = "ARN of the IAM role for the EKS node group"
+  type        = string
+}

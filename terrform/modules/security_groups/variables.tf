@@ -7,3 +7,8 @@ variable "private_subnets" {
     description = "CIDR blocks for private subnets"
     type = list(string)
 }
+
+variable "bastion_sg_id" {
+  description = "ID of the Bastion Host security group"
+  type        = string
+}

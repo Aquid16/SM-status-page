@@ -73,6 +73,15 @@ variable "principal_arns" {
   type = list(string)
 }
 
+variable "eks_cluster_role_arn" { 
+  type = string
+}
+
+variable "eks_node_group_role_arn" { 
+  type = string 
+}
+
+
 variable "rds_identifier" {
   description = "Identifier for the RDS instance"
   type        = string
@@ -91,5 +100,10 @@ variable "rds_password" {
 
 variable "rds_database_name" {
   description = "Name of the initial database"
+  type        = string
+}
+
+variable "ssh_key_name" {
+  description = "Name of the SSH key pair in AWS"
   type        = string
 }
