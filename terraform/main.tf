@@ -30,6 +30,15 @@ module "security_groups" {
   bastion_sg_id   = module.bastion.bastion_sg_id
 }
 
+# EFS File System
+module "efs" {
+  source = "./modules/efs"
+  efs_name         = "sm-efs"
+  subnet_ids       = module.vpc.private_subnets
+  security_group_id = module.security_groups.admin_sg_id
+}
+
+
 # EKS Cluster
 module "eks" {
   source = "./modules/eks"
