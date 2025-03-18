@@ -21,10 +21,6 @@ module "security_groups" {
   private_subnets = var.private_subnets_cidr_blocks
 }
 
-module "iam_roles" {
-  source = "./modules/iam_roles"
-}
-
 # EKS Cluster
 module "eks" {
   source = "./modules/eks"
@@ -35,8 +31,6 @@ module "eks" {
   subnet_ids          = module.vpc.private_subnets
   admin_sg_id         = module.security_groups.admin_sg_id
   user_sg_id          = module.security_groups.user_sg_id
-  node_group_role_arn = module.iam_roles.node_group_role_arn
-  iam_role_arn    = module.iam_roles.cluster_role_arn
   desired_size        = var.node_group_desired_size
   max_size            = var.node_group_max_size
   min_size            = var.node_group_min_size
@@ -46,7 +40,7 @@ module "eks" {
 module "access_entries" {
   source = "./modules/access_entries"
 
-  cluster_name   = module.eks.cluster_id
+  cluster_name   = module.eks.cluster_name
   principal_arns = var.principal_arns  
 }
 
