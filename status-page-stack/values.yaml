@@ -36,8 +36,8 @@ nginx:
   image: nginx:alpine
   replicas: 2  # HA 
   ports:
-    http: 80
-    https: 443
+    http: "80"
+    https: "443"
 
 # Volumes
 volumes:
