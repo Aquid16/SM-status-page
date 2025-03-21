@@ -16,6 +16,7 @@ RUN apt-get update && apt-get install -y \
     libxslt1-dev \
     libffi-dev \
     libssl-dev \
+    supervisor \
     && apt-get clean
 
 # Create system user and group
@@ -41,5 +42,8 @@ RUN chmod +x /opt/status-page/upgrade.sh && \
 EXPOSE 8001
 EXPOSE 8000
 
-# Command to run Gunicorn (will be overridden in docker-compose if needed)
+# Copy supervisord config
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Command to run supervisord
 CMD ["/opt/status-page/entrypoint.sh"]

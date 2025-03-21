@@ -15,10 +15,10 @@ ALLOWED_HOSTS = ['*']
 DATABASE = {
     'NAME': os.environ.get('DATABASE_NAME', 'statuspage'),                                                                  # Database name
     'USER': os.environ.get('DATABASE_USER', 'statuspage'),                                                                  # PostgreSQL username
-    'PASSWORD': os.environ.get('DATABASE_PASSWORD', 'abcdefgh123456'),                                                          # PostgreSQL password
+    'PASSWORD': os.environ.get('DATABASE_PASSWORD', 'abcdefgh123456'),                                                      # PostgreSQL password
     'HOST': os.environ.get('DATABASE_HOST', 'sm-statuspage-postgresql.cx248m4we6k7.us-east-1.rds.amazonaws.com'),           # Database server
     'PORT': os.environ.get('DATABASE_PORT', '5432'),                                                                        # Database port (leave blank for default)
-    'CONN_MAX_AGE': 300,                                                                   # Max database connection age
+    'CONN_MAX_AGE': 300,                                                                                                    # Max database connection age
 }
 
 # Redis database settings. Redis is used for caching and for queuing background tasks. A separate configuration exists
@@ -59,7 +59,7 @@ SITE_URL = ""
 # For optimal security, SECRET_KEY should be at least 50 characters in length and contain a mix of letters, numbers, and
 # symbols. Status-Page will not run without this defined. For more information, see
 # https://docs.djangoproject.com/en/stable/ref/settings/#std:setting-SECRET_KEY
-SECRET_KEY = os.environ.get('SECRET_KEY', "Pv)hkWbYxkpaD_dh$ULGa6MF#ADn6&=MU&#v5cjRyViuTbPHuG")
+SECRET_KEY = "Pv)hkWbYxkpaD_dh$ULGa6MF#ADn6&=MU&#v5cjRyViuTbPHuG"
 
 #
 # Optional Settings
@@ -100,7 +100,7 @@ CORS_ORIGIN_REGEX_WHITELIST = [
 # Set to True to enable server debugging. WARNING: Debugging introduces a substantial performance penalty and may reveal
 # sensitive information about your installation. Only enable debugging while performing testing. Never enable debugging
 # on a production system.
-DEBUG = False
+DEBUG = True
 
 # Email settings
 EMAIL = {

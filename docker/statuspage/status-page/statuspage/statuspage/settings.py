@@ -82,9 +82,9 @@ for param in PARAMS:
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': DATABASE.get('NAME', 'status-page'),
-        'USER': DATABASE.get('USER', 'status-page'),
-        'PASSWORD': DATABASE.get('PASSWORD'),
+        'NAME': DATABASE.get('NAME', 'statuspage'),
+        'USER': DATABASE.get('USER', 'statuspage'),
+        'PASSWORD': DATABASE.get('PASSWORD', 'abcdefgh123456'),
         'HOST': DATABASE.get('HOST'),
         'PORT': DATABASE.get('PORT'),
         'CONN_MAX_AGE': DATABASE.get('CONN_MAX_AGE',300),
