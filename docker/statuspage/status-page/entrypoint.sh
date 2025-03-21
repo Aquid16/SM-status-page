@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Ensure log directory exists and is writable
+echo "Setting up log directory..."
+mkdir -p /var/log/status-page
+chown -R status-page:status-page /var/log/status-page
+chmod -R 755 /var/log/status-page
+
 # Run upgrade script
 /opt/status-page/upgrade.sh
 
@@ -16,9 +22,11 @@ cp /opt/status-page/contrib/gunicorn.py /opt/status-page/gunicorn.py
 #echo "Starting Django development server for testing..."
 #exec python3 /opt/status-page/statuspage/manage.py runserver 0.0.0.0:8000 --insecure
 
-# Start Gunicorn
-echo "Starting Gunicorn..."
-export PYTHONPATH=/opt/status-page/statuspage
-exec gunicorn -c /opt/status-page/gunicorn.py statuspage.wsgi:application --chdir /opt/status-page/statuspage
+# # Start Gunicorn
+# echo "Starting Gunicorn..."
+# export PYTHONPATH=/opt/status-page/statuspage
+# exec gunicorn -c /opt/status-page/gunicorn.py statuspage.wsgi:application --chdir /opt/status-page/statuspage
 
-
+# Run supervisord to manage processes
+echo "Starting Supervisord..."
+exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf

@@ -1,16 +1,16 @@
 services:
-  # PostgreSQL service
+  # # PostgreSQL service
   # db:
   #   image: postgres:15
   #   container_name: status-page-db
   #   environment:
-  #     POSTGRES_USER: status-page
+  #     POSTGRES_USER: statuspage
   #     POSTGRES_PASSWORD: abcdefgh123456
-  #     POSTGRES_DB: status-page
+  #     POSTGRES_DB: statuspage
   #   volumes:
   #     - postgres_data:/var/lib/postgresql/data
   #   healthcheck:
-  #     test: ["CMD-SHELL", "pg_isready -U status-page -d status-page"]
+  #     test: ["CMD-SHELL", "pg_isready -U statuspage -d statuspage"]
   #     interval: 10s
   #     timeout: 5s
   #     retries: 5
@@ -42,9 +42,9 @@ services:
       - static_files:/opt/status-page/statuspage/static
     restart: no
     depends_on:
-#      db:
-#       condition: service_healthy
-      redis:
+    #  db:
+    #     condition: service_healthy
+     redis:
         condition: service_healthy
     environment:
       - DATABASE_NAME=statuspage
@@ -56,13 +56,12 @@ services:
       - REDIS_PORT=6379
       - REDIS_TASKS_DB=0
       - REDIS_CACHING_DB=1
-      - ALLOWED_HOSTS="*" 
-      - SECRET_KEY=Pv)hkWbYxkpaD_dh$ULGa6MF#ADn6&=MU&#v5cjRyViuTbPHuG
+      - ALLOWED_HOSTS="*"
       - DJANGO_SUPERUSER_USERNAME=admin
       - DJANGO_SUPERUSER_PASSWORD=admin123
       - DJANGO_SUPERUSER_EMAIL=admin@example.com
-#    ports:
-#      - "8000:8000"
+    # ports:
+    #   - "8001:8001"
     networks:
       - status_page_network
 
