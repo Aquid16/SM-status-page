@@ -9,6 +9,20 @@ resource "aws_db_subnet_group" "rds_subnet_group" {
   }
 }
 
+resource "aws_db_parameter_group" "custom_pg" {
+  name   = "${var.identifier}-pg"
+  family = "postgres17"
+
+  parameter {
+    name  = "rds.force_ssl"
+    value = "0"
+  }
+
+  tags = {
+    Name = "${var.identifier}-pg"
+  }
+}
+
 module "rds" {
   source  = "terraform-aws-modules/rds/aws"
   version = "~> 5.0"
@@ -29,6 +43,8 @@ module "rds" {
 
   family = "postgres17"
 
+  parameter_group_name = aws_db_parameter_group.custom_pg.name
+  
   tags = {
     Name  = var.identifier
   }
