@@ -8,26 +8,6 @@ variable "cluster_version" {
   type        = string
 }
 
-variable "vpc_id" {
-  description = "ID of the VPC"
-  type        = string
-}
-
-variable "subnet_ids" {
-  description = "Subnet IDs for the EKS cluster"
-  type        = list(string)
-}
-
-variable "admin_sg_id" {
-  description = "ID of the admin security group"
-  type        = string
-}
-
-variable "user_sg_id" {
-  description = "ID of the user security group"
-  type        = string
-}
-
 variable "desired_size" {
   description = "Desired number of nodes in the EKS node group"
   type        = number
