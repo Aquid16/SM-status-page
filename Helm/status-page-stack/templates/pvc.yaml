@@ -24,17 +24,3 @@ spec:
   resources:
     requests:
       storage: {{ .Values.volumes.static_files.size }}
-
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: redis-data
-  namespace: {{ .Values.namespace }}
-spec:
-  storageClassName: efs-sc
-  accessModes: 
-     - ReadWriteMany
-  resources:
-    requests:
-      storage: {{ .Values.volumes.redis_data.size }}
