@@ -7,9 +7,6 @@ terraform.tfstate.backup
 # Terraform plan files
 *.tfplan
 
-# Terraform variables file with sensitive data
-terraform.tfvars
-
 # Terraform lock file
 .terraform.lock.hcl
 

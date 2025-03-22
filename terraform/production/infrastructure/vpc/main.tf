@@ -1,6 +1,19 @@
 # -----------------------------------
 # VPC and Networking Module
 # -----------------------------------
+
+provider "aws" {
+  region = "us-east-1"
+}
+
+terraform {
+  backend "s3" {
+    bucket = "sharon-meital-terraform-state-bucket"
+    key    = "vpc/terraform.tfstate"
+    region = "us-east-1"
+  }
+}
+
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "~> 5.0"

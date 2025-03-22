@@ -1,9 +1,41 @@
 # -----------------------------------
 # RDS Database Module
 # -----------------------------------
+
+provider "aws" {
+  region = "us-east-1"
+}
+
+terraform {
+  backend "s3" {
+    bucket = "sharon-meital-terraform-state-bucket"
+    key    = "rds/terraform.tfstate"
+    region = "us-east-1"
+  }
+}
+
+data "terraform_remote_state" "vpc" {
+  backend = "s3"
+  config = {
+    bucket = "sharon-meital-terraform-state-bucket"
+    key    = "vpc/terraform.tfstate"
+    region = "us-east-1"
+  }
+}
+
+data "terraform_remote_state" "security_groups" {
+  backend = "s3"
+  config = {
+    bucket = "sharon-meital-terraform-state-bucket"
+    key    = "security_groups/terraform.tfstate"
+    region = "us-east-1"
+  }
+}
+
+
 resource "aws_db_subnet_group" "rds_subnet_group" {
   name       = "${var.identifier}-subnet-group"
-  subnet_ids = var.subnet_ids  # From module.vpc.private_subnets
+  subnet_ids = data.terraform_remote_state.vpc.outputs.private_subnets
   tags = {
     Name  = "${var.identifier}-subnet-group"
   }
@@ -38,7 +70,7 @@ module "rds" {
   password            = var.password
   publicly_accessible = false
 
-  vpc_security_group_ids = var.vpc_security_group_ids  
+  vpc_security_group_ids = [data.terraform_remote_state.security_groups.outputs.admin_sg_id]
   db_subnet_group_name   = aws_db_subnet_group.rds_subnet_group.name  
 
   family = "postgres17"
