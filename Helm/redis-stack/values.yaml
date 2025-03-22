@@ -1,0 +1,18 @@
+# Default namespace for all resources deployed by this chart
+namespace: production
+
+# Redis
+redis:
+  image: redis:6
+  port: 6379
+  replicas: 2  # HA 
+  healthcheck:
+    test: ["CMD", "redis-cli", "ping"]
+    interval: "10s"
+    timeout: "5s"
+    retries: 5
+
+# Volumes
+volumes:
+  redis_data:
+    size: 1Gi
