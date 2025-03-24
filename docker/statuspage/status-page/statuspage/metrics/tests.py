@@ -1,5 +1,5 @@
 from django.test import TestCase
-from models import Metric
+from .models import Metric
 from django.urls import reverse
 
 class MetricTests(TestCase):
