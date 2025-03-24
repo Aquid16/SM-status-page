@@ -1,5 +1,5 @@
 from django.test import TestCase
-from statuspage.subscribers.models import Subscriber
+from models import Subscriber
 from django.urls import reverse
 
 class SubscriberTests(TestCase):
