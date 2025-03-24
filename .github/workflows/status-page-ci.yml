@@ -6,7 +6,7 @@ on:
     branches:
       - Development
     paths:
-      - 'terraform/statuspage_pr'
+      - 'terraform/statuspage_pr/**'
 jobs:
   ci:
     runs-on: ubuntu-latest
