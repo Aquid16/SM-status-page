@@ -1,5 +1,5 @@
 from django.test import TestCase
-from models import Queue
+from .models import Queue
 from django.urls import reverse
 
 class QueueTests(TestCase):
