@@ -1,5 +1,5 @@
 from django.test import TestCase
-from models import Extra
+from .models import Extra
 from django.urls import reverse
 
 class ExtraTests(TestCase):
