@@ -1,5 +1,5 @@
 from django.test import TestCase
-from statuspage.incidents.models import Incident
+from models import Incident
 from django.urls import reverse
 
 class IncidentTests(TestCase):
