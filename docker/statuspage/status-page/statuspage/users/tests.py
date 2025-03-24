@@ -1,5 +1,5 @@
 from django.test import TestCase
-from statuspage.users.models import User
+from models import User
 from django.urls import reverse
 
 class UserTests(TestCase):
