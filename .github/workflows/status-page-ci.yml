@@ -22,6 +22,13 @@ jobs:
     - name: Check Terraform version
       run: terraform version
 
+    - name: Set AWS credentials
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      run: |
+        echo "AWS credentials set"
+
     - name: Initialize Terraform
       run: cd ./terraform/statuspage_pr && terraform init
 
@@ -30,15 +37,9 @@ jobs:
 
     - name: Apply Terraform
       run: cd ./terraform/statuspage_pr && terraform apply -auto-approve -input=false tfplan
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
     - name: Destroy Terraform
       run: cd ./terraform/statuspage_pr && terraform destroy -auto-approve -input=false
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
     # - name: Trigger CD
     #   run: |
