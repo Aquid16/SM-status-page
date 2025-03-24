@@ -18,19 +18,19 @@ jobs:
       uses: hashicorp/setup-terraform@v1
 
     - name: Initialize Terraform
-      run: terraform init ./terraform/statuspage_pr
+      run: terraform init -chdir=./terraform/statuspage_pr
 
     - name: Plan Terraform
-      run: terraform plan -out=tfplan ./terraform/statuspage_pr 
+      run: terraform plan -out=tfplan -chdir=./terraform/statuspage_pr 
 
     - name: Apply Terraform
-      run: terraform apply -auto-approve -input=false tfplan ./terraform/statuspage_pr 
+      run: terraform apply -auto-approve -input=false tfplan -chdir=./terraform/statuspage_pr
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
     - name: Destroy Terraform
-      run: terraform destroy -auto-approve -input=false ./terraform/statuspage_pr
+      run: terraform destroy -auto-approve -input=false -chdir=./terraform/statuspage_pr
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
