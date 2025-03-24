@@ -1,20 +1,13 @@
 # Default namespace for all resources deployed by this chart
 namespace: production
 
-# # Redis
-# redis:
-#   image: redis:6
-#   port: 6379
-#   replicas: 2  # HA 
-#   healthcheck:
-#     test: ["CMD", "redis-cli", "ping"]
-#     interval: "10s"
-#     timeout: "5s"
-#     retries: 5
 
 # Django
 django:
-  image: status-page-django
+  image: 
+    repository: 992382545251.dkr.ecr.us-east-1.amazonaws.com/sharon-meital/statuspage
+    tag: django
+    pullPolicy: Always
   build:
     context: ./statuspage
   replicas: 2  # HA 
@@ -33,7 +26,10 @@ django:
 
 # Nginx
 nginx:
-  image: nginx:alpine
+  image: 
+    repository: 992382545251.dkr.ecr.us-east-1.amazonaws.com/sharon-meital/statuspage
+    tag: nginx
+    pullPolicy: Always
   replicas: 2  # HA 
   ports:
     http: "80"
@@ -42,8 +38,6 @@ nginx:
 # Volumes
 volumes:
   status_page_venv:
-    size: 3Gi
+    size: 10Gi
   static_files:
-    size: 1Gi
-  redis_data:
-    size: 1Gi
+    size: 5Gi

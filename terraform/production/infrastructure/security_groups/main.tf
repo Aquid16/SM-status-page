@@ -68,6 +68,14 @@ resource "aws_security_group" "admin_sg" {
     description = "Allow NFS traffic for EFS from private subnets"
   }
 
+  ingress {
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    cidr_blocks = data.terraform_remote_state.vpc.outputs.private_subnets_cidr_blocks
+    description = "Allow PostgresSQL traffic from private subnets"
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
