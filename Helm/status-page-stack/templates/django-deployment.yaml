@@ -29,12 +29,23 @@ spec:
               topologyKey: kubernetes.io/hostname
       containers:
       - name: django
-        image: {{ .Values.django.image }}
+        image: "{{ .Values.django.image.repository }}:{{ .Values.django.image.tag }}"
+        imagePullPolicy: {{ .Values.django.image.pullPolicy }}
         envFrom:
         - configMapRef:
             name: django-config
-        - secretRef:
-            name: django-secret
+        env:
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: django-secret
+              key: DATABASE_PASSWORD
+        - name: DJANGO_SUPERUSER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: django-secret
+              key: DJANGO_SUPERUSER_PASSWORD
+        
         volumeMounts:
         - name: status-page-venv
           mountPath: /opt/status-page/venv
@@ -42,8 +53,7 @@ spec:
           mountPath: /opt/status-page/statuspage/static
       volumes:
       - name: status-page-venv
-        persistentVolumeClaim:
-          claimName: status-page-venv-pvc
+        emptyDir: {}
       - name: static-files
         persistentVolumeClaim:
           claimName: static-files-pvc

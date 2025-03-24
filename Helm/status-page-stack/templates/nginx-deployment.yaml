@@ -27,7 +27,8 @@ spec:
             topologyKey: kubernetes.io/hostname
       containers:
       - name: nginx
-        image: {{ .Values.nginx.image }}
+        image: "{{ .Values.nginx.image.repository }}:{{ .Values.nginx.image.tag }}"
+        imagePullPolicy: {{ .Values.nginx.image.pullPolicy }}
         ports:
         - containerPort: {{ .Values.nginx.ports.http }}
         - containerPort: {{ .Values.nginx.ports.https }}

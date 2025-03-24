@@ -15,4 +15,4 @@ redis:
 # Volumes
 volumes:
   redis_data:
-    size: 1Gi
+    size: 10Gi
