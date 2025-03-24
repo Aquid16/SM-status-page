@@ -1,5 +1,5 @@
 from django.test import TestCase
-from models import Component
+from .models import Component
 from django.urls import reverse
 
 class ComponentTests(TestCase):
