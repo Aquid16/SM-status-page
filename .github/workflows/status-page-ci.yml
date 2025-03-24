@@ -16,6 +16,11 @@ jobs:
 
     - name: Set Up Terraform
       uses: hashicorp/setup-terraform@v1
+      with:
+        terraform_version: latest
+
+    - name: Check Terraform version
+      run: terraform version
 
     - name: Initialize Terraform
       run: terraform init -chdir=./terraform/statuspage_pr
