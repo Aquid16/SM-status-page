@@ -1,5 +1,5 @@
 from django.test import TestCase
-from statuspage.utilities.models import Utility
+from models import Utility
 from django.urls import reverse
 
 class UtilityTests(TestCase):
