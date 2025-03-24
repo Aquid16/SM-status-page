@@ -1,5 +1,5 @@
 from django.test import TestCase
-from statuspage.maintenances.models import Maintenance
+from models import Maintenance
 from django.urls import reverse
 
 class MaintenanceTests(TestCase):
