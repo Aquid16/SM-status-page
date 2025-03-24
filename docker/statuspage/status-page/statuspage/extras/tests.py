@@ -1,5 +1,5 @@
 from django.test import TestCase
-from statuspage.extras.models import Extra
+from models import Extra
 from django.urls import reverse
 
 class ExtraTests(TestCase):
