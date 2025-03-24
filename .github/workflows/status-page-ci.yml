@@ -1,0 +1,44 @@
+name: Status Page CI Workflow
+
+on: 
+  workflow_dispatch:
+  push:
+    branches:
+      - Development
+    paths:
+      - 'terraform/statuspage_pr'
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Set Up Terraform
+      uses: hashicorp/setup-terraform@v1
+
+    - name: Initialize Terraform
+      run: terraform init ./terraform/statuspage_pr
+
+    - name: Plan Terraform
+      run: terraform plan -out=tfplan ./terraform/statuspage_pr 
+
+    - name: Apply Terraform
+      run: terraform apply -auto-approve -input=false tfplan ./terraform/statuspage_pr 
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+    - name: Destroy Terraform
+      run: terraform destroy -auto-approve -input=false ./terraform/statuspage_pr
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+    # - name: Trigger CD
+    #   run: |
+    #     curl -X POST \
+    #     -H "Authorization: Bearer ${{ secrets.GH_TOKEN }}" \
+    #     -H "Accept: application/vnd.github.v3+json" \
+    #     -d '{"ref":"main"}' \
+    #     https://api.github.com/repos/${{ github.repository }}/actions/workflows/status-page-cd.yml/dispatches
