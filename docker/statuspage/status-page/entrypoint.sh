@@ -7,9 +7,11 @@ chown -R status-page:status-page /var/log/status-page
 chmod -R 755 /var/log/status-page
 
 # Run upgrade script
+echo "Run upgrade script..."
 /opt/status-page/upgrade.sh
 
 # Activate venv 
+echo "Activate venv..."
 . /opt/status-page/venv/bin/activate
 
 # Create superuser (if it doesn't already exist)
