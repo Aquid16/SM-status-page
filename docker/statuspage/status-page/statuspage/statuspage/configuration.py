@@ -8,7 +8,7 @@ import os
 # write access to the server via any other hostnames. The first FQDN in the list will be treated as the preferred name.
 #
 # Example: ALLOWED_HOSTS = ['status-page.example.com', 'status-page.internal.local']
-ALLOWED_HOSTS = ['sm-status-page.com']
+ALLOWED_HOSTS = ['sm-status-page.com', 'test-sm-status-page.click']
 
 # PostgreSQL database configuration. See the Django documentation for a complete list of available parameters:
 #   https://docs.djangoproject.com/en/stable/ref/settings/#databases
@@ -100,7 +100,7 @@ CORS_ORIGIN_REGEX_WHITELIST = [
 # Set to True to enable server debugging. WARNING: Debugging introduces a substantial performance penalty and may reveal
 # sensitive information about your installation. Only enable debugging while performing testing. Never enable debugging
 # on a production system.
-DEBUG = True
+DEBUG = False
 
 # Email settings
 EMAIL = {
@@ -152,7 +152,7 @@ RQ_DEFAULT_TIMEOUT = 300
 
 # The name to use for the csrf token cookie.
 CSRF_COOKIE_NAME = 'csrftoken'
-CSRF_TRUSTED_ORIGINS = ['https://sm-status-page.com',]
+CSRF_TRUSTED_ORIGINS = ['https://sm-status-page.com','https://test-sm-status-page.click']
 
 # The name to use for the session cookie.
 SESSION_COOKIE_NAME = 'sessionid'
