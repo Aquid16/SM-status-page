@@ -8,8 +8,6 @@ django:
     repository: 992382545251.dkr.ecr.us-east-1.amazonaws.com/sharon-meital/statuspage
     tag: django
     pullPolicy: Always
-  build:
-    context: ./statuspage
   replicas: 2  # HA 
   env:
     DATABASE_NAME: statuspage
@@ -36,7 +34,5 @@ nginx:
 
 # Volumes
 volumes:
-  status_page_venv:
-    size: 10Gi
   static_files:
     size: 5Gi
