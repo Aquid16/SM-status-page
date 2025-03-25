@@ -135,7 +135,7 @@ provider "helm" {
 resource "helm_release" "redis" {
   name       = "redis"
   namespace  = "development"
-  chart      = "./Helm/statuspage_pr/redis-stack"
+  chart      = "https://github.com/Aquid16/SM-status-page/raw/Development/Helm/statuspage_pr/redis-stack" 
   wait       = true
 }
 
@@ -143,7 +143,7 @@ resource "helm_release" "redis" {
 resource "helm_release" "efs" {
   name       = "efs"
   namespace  = "development"
-  chart      = "./Helm/statuspage_pr/efs-sc-stack"
+  chart      = "https://github.com/Aquid16/SM-status-page/raw/Development/Helm/statuspage_pr/efs-sc-stack/"
   wait       = true
 
   set {
@@ -156,7 +156,7 @@ resource "helm_release" "efs" {
 resource "helm_release" "statuspage" {
   name       = "status-page"
   namespace  = "development"
-  chart      = "./Helm/statuspage_pr/status-page-stack"
+  chart      = "https://github.com/Aquid16/SM-status-page/raw/Development/Helm/statuspage_pr/status-page-stack/"
   wait       = true
 
   set {
