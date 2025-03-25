@@ -44,22 +44,35 @@ jobs:
         terraform apply -auto-approve -input=false 
 
     - name: Get Terraform Outputs
-      id: terraform_outputs
       run: |
-        echo "RDS_ENDPOINT=$(terraform -chdir=./terraform/statuspage_pr output -raw rds_endpoint)" >> $GITHUB_ENV
-        echo "EFS_FILESYSTEM_ID=$(terraform -chdir=./terraform/statuspage_pr output -raw efs_filesystem_id)" >> $GITHUB_ENV
+        cd ./terraform/statuspage_pr
+        RDS_ENDPOINT=$(terraform output -raw rds_endpoint | tr -d '\n' | tr -d '\r')
+        EFS_FILESYSTEM_ID=$(terraform output -raw efs_filesystem_id | tr -d '\n' | tr -d '\r')
+    
+        echo "RDS_ENDPOINT=$RDS_ENDPOINT" >> $GITHUB_ENV
+        echo "EFS_FILESYSTEM_ID=$EFS_FILESYSTEM_ID" >> $GITHUB_ENV
 
 
     - name: Install AWS CLI & kubectl
       run: |
+        # Update apt package lists
         sudo apt-get update
-        sudo apt-get install -y awscli
+        set -e 
+
+        # Install AWS CLI
+        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+        unzip awscliv2.zip
+        sudo ./aws/install --update
+        aws --version
+
+        # Install kubectl
         curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
         chmod +x kubectl
         sudo mv kubectl /usr/local/bin/
+        kubectl version --client
 
     - name: Configure kubeconfig
-      run: aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name ${{ secrets.EKS_CLUSTER_NAME }}
+      run: aws eks update-kubeconfig --region ${{ secrets.AWS_DEFAULT_REGION }} --name ${{ secrets.EKS_CLUSTER_NAME }}
 
     - name: Update statuspage values.yaml
       run: |
