@@ -99,7 +99,7 @@ resource "aws_efs_file_system" "statuspage_efs" {
 # EFS Mount Targets
 resource "aws_efs_mount_target" "efs_mount_test" {
   count           = length(data.aws_subnets.private.ids)
-  file_system_id  = aws_efs_file_system.efs_test.id
+  file_system_id  = aws_efs_file_system.statuspage_efs.id
   subnet_id       = data.aws_subnets.private.ids[count.index]
   security_groups = [data.aws_security_group.sg.id]
 }
