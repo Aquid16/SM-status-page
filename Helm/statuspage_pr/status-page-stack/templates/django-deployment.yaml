@@ -38,12 +38,12 @@ spec:
         - name: DATABASE_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: django-secret
+              name: django-test-secret
               key: DATABASE_PASSWORD
         - name: DJANGO_SUPERUSER_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: django-secret
+              name: django-test-secret
               key: DJANGO_SUPERUSER_PASSWORD
         
         volumeMounts:
