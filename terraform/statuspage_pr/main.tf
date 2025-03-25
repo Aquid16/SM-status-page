@@ -88,7 +88,7 @@ resource "aws_db_subnet_group" "statuspage_subnet_group" {
   description = "Subnet group for StatusPage RDS instance sm-test"
 }
 
-resource "aws_efs_file_system" "efs_test" {
+resource "aws_efs_file_system" "statuspage_efs" {
   creation_token = "sm-efs-test"
   encrypted      = true
   tags = {
@@ -99,7 +99,7 @@ resource "aws_efs_file_system" "efs_test" {
 # EFS Mount Targets
 resource "aws_efs_mount_target" "efs_mount_test" {
   count           = length(data.aws_subnets.private.ids)
-  file_system_id  = aws_efs_file_system.efs_test.id
+  file_system_id  = aws_efs_file_system.statuspage_efs.id
   subnet_id       = data.aws_subnets.private.ids[count.index]
   security_groups = [data.aws_security_group.sg.id]
 }
