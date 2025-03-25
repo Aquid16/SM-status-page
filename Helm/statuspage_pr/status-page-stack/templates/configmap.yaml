@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: django-config
+  name: django-test-config
   namespace: {{ .Values.namespace }}
 data:
   DATABASE_NAME: "{{ .Values.django.env.DATABASE_NAME }}"

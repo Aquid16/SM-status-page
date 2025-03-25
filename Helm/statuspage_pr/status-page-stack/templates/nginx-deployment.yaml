@@ -38,4 +38,4 @@ spec:
       volumes:
       - name: static-files
         persistentVolumeClaim:
-          claimName: static-files-pvc
+          claimName: static-files-pvc-test
