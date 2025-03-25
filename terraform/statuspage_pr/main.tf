@@ -113,11 +113,21 @@ data "aws_eks_cluster_auth" "cluster" {
 }
 
 # --- HELM PROVIDER ---
+data "aws_ecr_authorization_token" "example" {}
+
 provider "helm" {
   kubernetes {
+    config_path = "~/.kube/config"
     host                   = data.aws_eks_cluster.cluster.endpoint
     token                  = data.aws_eks_cluster_auth.cluster.token
     cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority[0].data)
+  }
+
+  repository {
+    name = "sharon-meital/statuspage"
+    url  = "https://992382545251.dkr.ecr.us-east-1.amazonaws.com"
+    username = data.aws_ecr_authorization_token.example.username
+    password = data.aws_ecr_authorization_token.example.password
   }
 }
 
@@ -125,7 +135,7 @@ provider "helm" {
 resource "helm_release" "redis" {
   name       = "redis"
   namespace  = "development"
-  chart      = "${path.module}/Helm/statuspage_pr/redis-stack"
+  chart      = "SM-status-page/Helm/statuspage_pr/redis-stack"
   wait       = true
 }
 
@@ -133,7 +143,7 @@ resource "helm_release" "redis" {
 resource "helm_release" "efs" {
   name       = "efs"
   namespace  = "development"
-  chart      = "${path.module}/Helm/statuspage_pr/efs-sc-stack"
+  chart      = "SM-status-page/Helm/statuspage_pr/efs-sc-stack"
   wait       = true
 
   set {
