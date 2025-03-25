@@ -137,7 +137,7 @@ resource "helm_release" "efs" {
   wait       = true
 
   values = [
-      templatefile("$./Helm/statuspage_pr/efs-sc-stack/values.yaml.tpl", {
+      templatefile("./Helm/statuspage_pr/efs-sc-stack/values.yaml.tpl", {
         efs_filesystem_id = aws_efs_file_system.statuspage_efs.id
       })
     ]
