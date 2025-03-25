@@ -88,7 +88,7 @@ resource "aws_db_subnet_group" "statuspage_subnet_group" {
   description = "Subnet group for StatusPage RDS instance sm-test"
 }
 
-resource "aws_efs_file_system" "efs_test" {
+resource "aws_efs_file_system" "statuspage_efs" {
   creation_token = "sm-efs-test"
   encrypted      = true
   tags = {
