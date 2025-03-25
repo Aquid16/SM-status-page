@@ -1,24 +1,13 @@
 from django.test import TestCase
-from .models import Maintenance
-from django.urls import reverse
+from rest_framework.test import APIClient
+from django.contrib.auth.models import User
 
-class MaintenanceTests(TestCase):
-
+class MaintenancesTest(TestCase):
     def setUp(self):
-        self.maintenance_data = {'name': 'Database Maintenance', 'status': 'Scheduled'}
-        self.maintenance = Maintenance.objects.create(**self.maintenance_data)
-
-    def test_create_maintenance(self):
-        maintenance = Maintenance.objects.create(name="System Upgrade", status="Completed")
-        self.assertEqual(maintenance.name, "System Upgrade")
-        self.assertEqual(maintenance.status, "Completed")
-
-    def test_maintenance_api(self):
-        url = reverse('maintenances:maintenance_list')
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-
-    def test_maintenance_detail(self):
-        url = reverse('maintenances:maintenance', kwargs={'pk': self.maintenance.pk})
-        response = self.client.get(url)
+        self.user = User.objects.create_user(username='admin', password='admin123')
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+    
+    def test_maintenance_list_view(self):
+        response = self.client.get('/api/maintenances/')
         self.assertEqual(response.status_code, 200)

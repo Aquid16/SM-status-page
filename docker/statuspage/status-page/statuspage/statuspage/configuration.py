@@ -152,6 +152,7 @@ RQ_DEFAULT_TIMEOUT = 300
 
 # The name to use for the csrf token cookie.
 CSRF_COOKIE_NAME = 'csrftoken'
+CSRF_TRUSTED_ORIGINS = ['https://sm-status-page.com',]
 
 # The name to use for the session cookie.
 SESSION_COOKIE_NAME = 'sessionid'

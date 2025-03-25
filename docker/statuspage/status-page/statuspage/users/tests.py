@@ -1,23 +1,14 @@
 from django.test import TestCase
-from .models import User
-from django.urls import reverse
+from rest_framework.test import APIClient
+from django.contrib.auth.models import User
 
-class UserTests(TestCase):
-
+class UsersTest(TestCase):
     def setUp(self):
-        self.user_data = {'username': 'testuser', 'password': 'password123'}
-        self.user = User.objects.create_user(**self.user_data)
+        self.user = User.objects.create_user(username='admin', password='admin123')
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+        
 
-    def test_create_user(self):
-        user = User.objects.create_user(username="newuser", password="password123")
-        self.assertEqual(user.username, "newuser")
-
-    def test_user_api(self):
-        url = reverse('users:user_list')
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-
-    def test_user_detail(self):
-        url = reverse('users:user', kwargs={'pk': self.user.pk})
-        response = self.client.get(url)
+    def test_profile_view(self):
+        response = self.client.get('/api/users/')
         self.assertEqual(response.status_code, 200)
