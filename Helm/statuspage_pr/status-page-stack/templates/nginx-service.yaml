@@ -11,10 +11,6 @@ spec:
     targetPort: {{ .Values.nginx.ports.http }}
     protocol: TCP
     name: http
-  # - port: {{ .Values.nginx.ports.https }}
-  #   targetPort: {{ .Values.nginx.ports.https }}
-  #   protocol: TCP
-  #   name: https
   selector:
     app: nginx
 

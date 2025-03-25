@@ -32,11 +32,6 @@ spec:
         ports:
         - containerPort: {{ .Values.nginx.ports.http }}
         - containerPort: {{ .Values.nginx.ports.https }}
-        env:
-        - name: MY_NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
         volumeMounts:
         - name: static-files
           mountPath: /opt/status-page/statuspage/static
