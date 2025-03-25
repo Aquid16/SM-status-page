@@ -1,0 +1,26 @@
+version: 2
+updates:
+  - package-ecosystem: "pip"
+    directory: "/docker/statuspage/status-page/"  
+    schedule:
+      interval: "weekly"
+    target-branch: "Development"
+  
+  - package-ecosystem: "github-actions"
+    directory: "/.github/workflows"
+    schedule:
+      interval: "weekly"
+    target-branch: "Development"
+  
+  - package-ecosystem: "docker"
+    directory: "/docker"
+    schedule:
+      interval: "weekly"
+    target-branch: "Development"
+
+  - package-ecosystem: "docker"
+    directory: "/docker/statuspage"
+    schedule:
+      interval: "weekly"
+    target-branch: "Development"
+    target-branch: "Development"

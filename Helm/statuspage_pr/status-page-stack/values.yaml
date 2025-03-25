@@ -10,7 +10,7 @@ django:
     pullPolicy: Always
   build:
     context: ./statuspage
-  replicas: 2  # HA 
+  replicas: 1  # 
   env:
     DATABASE_NAME: statuspage
     DATABASE_USER: statuspage
@@ -29,7 +29,7 @@ nginx:
     repository: 992382545251.dkr.ecr.us-east-1.amazonaws.com/sharon-meital/statuspage
     tag: nginx
     pullPolicy: Always
-  replicas: 2  # HA 
+  replicas: 1  
   ports:
     http: "80"
     https: "443"
