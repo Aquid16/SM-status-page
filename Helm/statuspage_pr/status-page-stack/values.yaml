@@ -1,0 +1,42 @@
+# Default namespace for all resources deployed by this chart
+namespace: development
+
+
+# Django
+django:
+  image: 
+    repository: 992382545251.dkr.ecr.us-east-1.amazonaws.com/sharon-meital/statuspage
+    tag: django
+    pullPolicy: Always
+  build:
+    context: ./statuspage
+  replicas: 2  # HA 
+  env:
+    DATABASE_NAME: statuspage
+    DATABASE_USER: statuspage
+    DATABASE_HOST: sm-statuspage-postgresql.cx248m4we6k7.us-east-1.rds.amazonaws.com
+    DATABASE_PORT: "5432"
+    REDIS_HOST: redis
+    REDIS_PORT: "6379"
+    REDIS_TASKS_DB: "0"
+    REDIS_CACHING_DB: "1"
+    DJANGO_SUPERUSER_USERNAME: admin
+    DJANGO_SUPERUSER_EMAIL: admin@example.com
+
+# Nginx
+nginx:
+  image: 
+    repository: 992382545251.dkr.ecr.us-east-1.amazonaws.com/sharon-meital/statuspage
+    tag: nginx
+    pullPolicy: Always
+  replicas: 2  # HA 
+  ports:
+    http: "80"
+    https: "443"
+
+# Volumes
+volumes:
+  status_page_venv:
+    size: 10Gi
+  static_files:
+    size: 5Gi

@@ -12,6 +12,5 @@ data:
   REDIS_PORT: "{{ .Values.django.env.REDIS_PORT }}"
   REDIS_TASKS_DB: "{{ .Values.django.env.REDIS_TASKS_DB }}"
   REDIS_CACHING_DB: "{{ .Values.django.env.REDIS_CACHING_DB }}"
-  ALLOWED_HOSTS: "{{ .Values.django.env.ALLOWED_HOSTS }}"
   DJANGO_SUPERUSER_USERNAME: "{{ .Values.django.env.DJANGO_SUPERUSER_USERNAME }}"
   DJANGO_SUPERUSER_EMAIL: "{{ .Values.django.env.DJANGO_SUPERUSER_EMAIL }}"
