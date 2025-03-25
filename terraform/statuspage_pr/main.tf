@@ -136,12 +136,11 @@ resource "helm_release" "efs" {
   chart      = "./Helm/statuspage_pr/efs-sc-stack"
   wait       = true
 
-  values = [
-      templatefile("./Helm/statuspage_pr/efs-sc-stack/values.yaml.tpl", {
-        efs_filesystem_id = aws_efs_file_system.statuspage_efs.id
-      })
-    ]
+  set {
+    name  = "EFS_FILE_SYSTEM_ID"
+    value = aws_efs_file_system.statuspage_efs.id
   }
+}
 
 
 
@@ -153,9 +152,8 @@ resource "helm_release" "statuspage" {
   version    = "latest"
   wait       = true
 
-  values = [
-    templatefile("./Helm/statuspage_pr/status-page-stack/values.yaml.tpl", {
-      rds_endpoint      = aws_db_instance.statuspage_db.endpoint
-    })
-  ]
+  set {
+    name  = "DATABASE_HOST"
+    value = aws_db_instance.statuspage_db.endpoint
+  }
 }
