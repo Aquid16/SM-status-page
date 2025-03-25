@@ -89,6 +89,32 @@ jobs:
         # Example: Check if deployments are running
         #kubectl get pods -n development
 
+    - name: Get ALB hostname
+      run: |
+        ALB_HOSTNAME=$(kubectl get ingress -n development statuspage-ingress -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+        echo "ALB_HOSTNAME=$ALB_HOSTNAME" >> $GITHUB_ENV
+
+    - name: Add A Record (Alias) to Route 53
+      run: |
+        cat <<EOF > dns-record.json
+        {
+          "Comment": "Adding statuspage A record with alias",
+          "Changes": [{
+            "Action": "UPSERT",
+            "ResourceRecordSet": {
+              "Name": ${{ secrets.HOSTED_ZONE_NAME }},
+              "Type": "A",
+              "AliasTarget": {
+                "HostedZoneId": ${{ secrets.HOSTED_ZONE_ID }},
+                "DNSName": "$ALB_HOSTNAME",
+                "EvaluateTargetHealth": false
+              }
+            }
+          }]
+        }
+        EOF
+        aws route53 change-resource-record-sets --hosted-zone-id ${{ secrets.HOSTED_ZONE_ID }} --change-batch file://dns-record.json
+
     - name: Test connectivity to subpaths
       env:
         USERNAME: ${{ secrets.TEST_USERNAME }}
@@ -98,6 +124,27 @@ jobs:
         sleep 30 \
         chmod +x test/test-connectivity.sh \
         ./test/test-connectivity.sh 
+
+    - name: Remove A Record (Alias) from Route 53
+      run: |
+        cat <<EOF > dns-record.json
+        {
+          "Comment": "Removing statuspage A record",
+          "Changes": [{
+            "Action": "DELETE",
+            "ResourceRecordSet": {
+              "Name": ${{ secrets.HOSTED_ZONE_NAME }},
+              "Type": "A",
+              "AliasTarget": {
+                "HostedZoneId": ${{ secrets.HOSTED_ZONE_ID }},
+                "DNSName": "$ALB_HOSTNAME",
+                "EvaluateTargetHealth": false
+              }
+            }
+          }]
+        }
+        EOF
+        aws route53 change-resource-record-sets --hosted-zone-id ${{ secrets.HOSTED_ZONE_ID }} --change-batch file://dns-record.json
 
     - name: Uninstall Helm Stacks
       run: |
