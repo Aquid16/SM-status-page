@@ -104,3 +104,51 @@ resource "aws_efs_mount_target" "efs_mount_test" {
   security_groups = [data.aws_security_group.sg.id]
 }
 
+data "aws_eks_cluster" "cluster" {
+  name = "sm-statuspage-eks"
+}
+
+data "aws_eks_cluster_auth" "cluster" {
+  name = "sm-statuspage-eks"
+}
+
+# --- HELM PROVIDER ---
+provider "helm" {
+  kubernetes {
+    host                   = data.aws_eks_cluster.cluster.endpoint
+    token                  = data.aws_eks_cluster_auth.cluster.token
+    cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority[0].data)
+  }
+}
+
+# --- REDIS ---
+resource "helm_release" "redis" {
+  name       = "redis"
+  namespace  = "development"
+  chart      = "./Helm/statuspage_pr/redis-stack"
+  wait       = true
+}
+
+# --- EFS STORAGE CLASS ---
+resource "helm_release" "efs" {
+  name       = "efs"
+  namespace  = "development"
+  chart      = "./Helm/statuspage_pr/efs-sc-stack"
+  wait       = true
+}
+
+# --- STATUS PAGE HELM RELEASE ---
+resource "helm_release" "statuspage" {
+  name       = "status-page"
+  namespace  = "development"
+  chart      = "oci://992382545251.dkr.ecr.us-east-1.amazonaws.com/sharon-meital/statuspage"
+  version    = "latest"
+  wait       = true
+
+  values = [
+    templatefile("${path.module}/values.yaml.tpl", {
+      rds_endpoint      = aws_db_instance.statuspage_db.endpoint
+      efs_filesystem_id = aws_efs_file_system.statuspage_efs.id
+    })
+  ]
+}
