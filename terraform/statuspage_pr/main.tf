@@ -125,7 +125,7 @@ provider "helm" {
 resource "helm_release" "redis" {
   name       = "redis"
   namespace  = "development"
-  chart      = "./Helm/statuspage_pr/redis-stack"
+  chart      = "${path.module}/Helm/statuspage_pr/redis-stack"
   wait       = true
 }
 
@@ -133,7 +133,7 @@ resource "helm_release" "redis" {
 resource "helm_release" "efs" {
   name       = "efs"
   namespace  = "development"
-  chart      = "./Helm/statuspage_pr/efs-sc-stack"
+  chart      = "${path.module}/Helm/statuspage_pr/efs-sc-stack"
   wait       = true
 
   set {
