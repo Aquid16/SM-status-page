@@ -87,4 +87,3 @@ resource "aws_db_subnet_group" "statuspage_subnet_group" {
   subnet_ids = data.aws_subnets.private.ids
   description = "Subnet group for StatusPage RDS instance sm-test"
 }
-}
