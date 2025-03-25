@@ -1,0 +1,4 @@
+# Default namespace for all resources deployed by this chart
+namespace: production
+
+fileSystemId: fs-09aaa0003f4692536

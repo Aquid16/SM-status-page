@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: django
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: django
+spec:
+  replicas: {{ .Values.django.replicas }}
+  selector:
+    matchLabels:
+      app: django
+  template:
+    metadata:
+      labels:
+        app: django
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - django
+              topologyKey: kubernetes.io/hostname
+      containers:
+      - name: django
+        image: "{{ .Values.django.image.repository }}:{{ .Values.django.image.tag }}"
+        imagePullPolicy: {{ .Values.django.image.pullPolicy }}
+        envFrom:
+        - configMapRef:
+            name: django-config
+        env:
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: django-secret
+              key: DATABASE_PASSWORD
+        - name: DJANGO_SUPERUSER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: django-secret
+              key: DJANGO_SUPERUSER_PASSWORD
+        
+        volumeMounts:
+        - name: status-page-venv
+          mountPath: /opt/status-page/venv
+        - name: static-files
+          mountPath: /opt/status-page/statuspage/static
+      volumes:
+      - name: status-page-venv
+        emptyDir: {}
+      - name: static-files
+        persistentVolumeClaim:
+          claimName: static-files-pvc-test

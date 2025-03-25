@@ -20,7 +20,6 @@ django:
     REDIS_PORT: "6379"
     REDIS_TASKS_DB: "0"
     REDIS_CACHING_DB: "1"
-    ALLOWED_HOSTS: "0.0.0.0"
     DJANGO_SUPERUSER_USERNAME: admin
     DJANGO_SUPERUSER_EMAIL: admin@example.com
 
