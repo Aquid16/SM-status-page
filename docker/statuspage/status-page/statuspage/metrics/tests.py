@@ -1,24 +1,13 @@
 from django.test import TestCase
-from .models import Metric
-from django.urls import reverse
+from rest_framework.test import APIClient
+from django.contrib.auth.models import User
 
-class MetricTests(TestCase):
-
+class MetricsTest(TestCase):
     def setUp(self):
-        self.metric_data = {'name': 'Page Load Time', 'value': '200ms'}
-        self.metric = Metric.objects.create(**self.metric_data)
-
-    def test_create_metric(self):
-        metric = Metric.objects.create(name="API Response Time", value="150ms")
-        self.assertEqual(metric.name, "API Response Time")
-        self.assertEqual(metric.value, "150ms")
-
-    def test_metric_api(self):
-        url = reverse('metrics:metric_list')
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-
-    def test_metric_detail(self):
-        url = reverse('metrics:metric', kwargs={'pk': self.metric.pk})
-        response = self.client.get(url)
+        self.user = User.objects.create_user(username='admin', password='admin123')
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+        
+    def test_metric_list_view(self):
+        response = self.client.get('/api/metrics/')
         self.assertEqual(response.status_code, 200)

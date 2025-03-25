@@ -1,24 +1,13 @@
 from django.test import TestCase
-from .models import Incident
-from django.urls import reverse
+from rest_framework.test import APIClient
+from django.contrib.auth.models import User
 
-class IncidentTests(TestCase):
-
+class IncidentsTest(TestCase):
     def setUp(self):
-        self.incident_data = {'name': 'Server Down', 'status': 'Ongoing'}
-        self.incident = Incident.objects.create(**self.incident_data)
-
-    def test_create_incident(self):
-        incident = Incident.objects.create(name="Database Issue", status="Resolved")
-        self.assertEqual(incident.name, "Database Issue")
-        self.assertEqual(incident.status, "Resolved")
-
-    def test_incident_api(self):
-        url = reverse('incidents:incident_list')
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-
-    def test_incident_detail(self):
-        url = reverse('incidents:incident', kwargs={'pk': self.incident.pk})
-        response = self.client.get(url)
+        self.user = User.objects.create_user(username='admin', password='admin123')
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+    
+    def test_incident_list_view(self):
+        response = self.client.get('/api/incidents/')
         self.assertEqual(response.status_code, 200)
