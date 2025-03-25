@@ -137,7 +137,7 @@ resource "helm_release" "efs" {
   wait       = true
 
   values = [
-      templatefile("${path.module}/Helm/statuspage_pr/efs-sc-stack/values.yaml.tpl", {
+      templatefile("$./Helm/statuspage_pr/efs-sc-stack/values.yaml.tpl", {
         efs_filesystem_id = aws_efs_file_system.statuspage_efs.id
       })
     ]
@@ -154,7 +154,7 @@ resource "helm_release" "statuspage" {
   wait       = true
 
   values = [
-    templatefile("${path.module}/Helm/statuspage_pr/status-page-stack/values.yaml.tpl", {
+    templatefile("./Helm/statuspage_pr/status-page-stack/values.yaml.tpl", {
       rds_endpoint      = aws_db_instance.statuspage_db.endpoint
     })
   ]
