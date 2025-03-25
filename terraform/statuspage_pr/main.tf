@@ -142,7 +142,6 @@ resource "helm_release" "efs" {
       })
     ]
   }
-}
 
 
 
