@@ -135,14 +135,16 @@ resource "helm_release" "efs" {
   namespace  = "development"
   chart      = "./Helm/statuspage_pr/efs-sc-stack"
   wait       = true
+
+  values = [
+      templatefile("${path.module}/Helm/statuspage_pr/efs-sc-stack/values.yaml.tpl", {
+        efs_filesystem_id = aws_efs_file_system.statuspage_efs.id
+      })
+    ]
+  }
 }
 
-values = [
-    templatefile("${path.module}/Helm/statuspage_pr/efs-sc-stack/values.yaml.tpl", {
-      efs_filesystem_id = aws_efs_file_system.statuspage_efs.id
-    })
-  ]
-}
+
 
 # --- STATUS PAGE HELM RELEASE ---
 resource "helm_release" "statuspage" {
