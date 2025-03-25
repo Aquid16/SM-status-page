@@ -1,5 +1,5 @@
 # Use official Python 3.11 image as base
-FROM python:3.11
+FROM python:3.13
 
 # Set working directory
 WORKDIR /opt/status-page/
