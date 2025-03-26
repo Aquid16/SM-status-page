@@ -66,17 +66,33 @@ jobs:
     - name: Get Terraform Outputs
       run: |
         cd ./terraform/statuspage_pr
-        RDS_ENDPOINT=$(terraform output -raw rds_endpoint | tr -d '\n' | tr -d '\r') || { echo "Error: rds_endpoint output not found"; exit 1; }
-        EFS_FILESYSTEM_ID=$(terraform output -raw efs_filesystem_id | tr -d '\n' | tr -d '\r') || { echo "Error: efs_filesystem_id output not found"; exit 1; }
+        sudo apt-get update && sudo apt-get install -y jq
+        terraform output -json rds_endpoint > raw_output.json || { echo "Error: Terraform output failed"; exit 1; }
+        cat raw_output.json
+        sed -n '/^{/,/^}/p' raw_output.json > rds_output.json
+        RDS_ENDPOINT=$(jq -r . rds_output.json 2>/dev/null)
+        if [ -z "$RDS_ENDPOINT" ]; then
+          echo "Error: Failed to parse rds_endpoint"
+          exit 1
+        fi
+        echo "RDS_ENDPOINT=$RDS_ENDPOINT" >> $GITHUB_ENV
+
+        EFS_FILESYSTEM_ID=$(terraform output -json efs_filesystem_id | jq -r . 2>/dev/null)
+        if [ -z "$EFS_FILESYSTEM_ID" ]; then
+          echo "Error: efs_filesystem_id output not found"
+          exit 1
+        fi 
+        
         BASTION_IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=sm-bastion-host" "Name=instance-state-name,Values=running" --query "Reservations[0].Instances[0].PublicIpAddress" --output text | tr -d '\n' | tr -d '\r')
         if [ -z "$BASTION_IP" ]; then
           echo "Error: BASTION_IP is empty; no instance found with tag Name=sm-bastion-host"
           exit 1
         fi
+        
         echo "Debug: RDS_ENDPOINT=$RDS_ENDPOINT"
         echo "Debug: EFS_FILESYSTEM_ID=$EFS_FILESYSTEM_ID"
         echo "Debug: BASTION_IP=$BASTION_IP"
-        echo "RDS_ENDPOINT=$RDS_ENDPOINT" >> $GITHUB_ENV
+        
         echo "EFS_FILESYSTEM_ID=$EFS_FILESYSTEM_ID" >> $GITHUB_ENV
         echo "BASTION_IP=$BASTION_IP" >> $GITHUB_ENV
 
@@ -142,14 +158,18 @@ jobs:
           fi
           echo "Debug: Original status-page-stack/values.yaml"
           cat ./status-page-stack/values.yaml
-          sed -i "s|DATABASE_HOST:.*|DATABASE_HOST: ${{ env.RDS_ENDPOINT }}|" ./status-page-stack/values.yaml
+          sed -i "s|DATABASE_HOST:.*|DATABASE_HOST: ${{ env.RDS_ENDPOINT }}|" ./status-page-stack/values.yaml || { echo "Error: sed command failed"; exit 1; }
           echo "Debug: Modified status-page-stack/values.yaml"
           cat ./status-page-stack/values.yaml
+          # Validate YAML syntax (requires yamllint or similar; optional if not installed)
+          if command -v yamllint >/dev/null 2>&1; then
+            yamllint ./status-page-stack/values.yaml || { echo "Error: Modified values.yaml is invalid YAML"; exit 1; }
+          fi
           kubectl create namespace development --dry-run=client -o yaml | kubectl apply -f -
           helm install efs ./efs-sc-stack -n development
           helm install redis ./redis-stack -n development
           helm install status-page ./status-page-stack -n development
-          ALB_HOSTNAME=$(kubectl get ingress -n development status-page-test-ingress -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+          ALB_HOSTNAME=$(kubectl get ingress -n development statuspage-ingress -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
           echo "ALB_HOSTNAME=$ALB_HOSTNAME" > /home/ubuntu/alb_hostname.txt
         EOF
 

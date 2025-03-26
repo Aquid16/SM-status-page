@@ -31,11 +31,25 @@ data "terraform_remote_state" "security_groups" {
   }
 }
 
+# Get the current AWS caller identity
+data "aws_caller_identity" "current" {}
+
+# Get the IAM user details based on the caller identity
+data "aws_iam_user" "current_user" {
+  user_name = element(split("/", data.aws_caller_identity.current.arn), 1)
+}
+
+# Define the owner dynamically
+locals {
+  owner = data.aws_iam_user.current_user.user_name
+}
+
 resource "aws_efs_file_system" "efs" {
   creation_token = var.efs_name
   encrypted      = true
   tags = {
     Name = var.efs_name
+    Owner = local.owner
   }
 }
 

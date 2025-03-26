@@ -1,0 +1,98 @@
+name: Status Page CD Workflow
+
+on:
+  workflow_dispatch:  # Only triggers manually via GitHub Actions UI
+
+jobs:
+  cd:
+    runs-on: ubuntu-latest
+    steps:
+    # Step 1: Checkout repository
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    # Step 2: Install AWS CLI
+    - name: Install AWS CLI
+      run: |
+        sudo apt-get update
+        set -e 
+        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+        unzip awscliv2.zip
+        sudo ./aws/install --update
+        aws --version
+
+    # Step 3: Configure AWS Credentials
+    - name: Configure AWS Credentials
+      run: |
+        aws configure set aws_access_key_id "${{ secrets.AWS_ACCESS_KEY_ID }}"
+        aws configure set aws_secret_access_key "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+        aws configure set default.region "${{ secrets.AWS_DEFAULT_REGION }}"
+        aws sts get-caller-identity 
+
+    # Step 4: Install Docker
+    - name: Install Docker
+      run: |
+        sudo apt-get update
+        sudo apt-get remove -y containerd docker.io || true
+        sudo apt-get install -y ca-certificates curl gnupg lsb-release
+        sudo mkdir -p /etc/apt/keyrings
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+        sudo apt-get update
+        sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+        docker --version
+
+    # Step 5: Install Docker Compose
+    - name: Install Docker Compose
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y docker-compose-plugin
+        docker compose version || { echo "Error: Docker Compose plugin installation failed"; exit 1; }
+
+    # Step 6: Build and Push Docker Images to ECR
+    - name: Build and Push Docker Images to ECR
+      run: |
+        set -e
+        # Login to AWS ECR
+        aws ecr get-login-password --region ${{ secrets.AWS_DEFAULT_REGION }} | docker login --username AWS --password-stdin 992382545251.dkr.ecr.us-east-1.amazonaws.com
+        cd docker
+        # Build images from docker-compose.yml
+        docker compose -f docker-compose.yml build
+        # Tag images for production ECR repository
+        docker tag docker_nginx 992382545251.dkr.ecr.us-east-1.amazonaws.com/sharon-meital/statuspage:nginx
+        docker tag docker_django 992382545251.dkr.ecr.us-east-1.amazonaws.com/sharon-meital/statuspage:django
+        # Push images to ECR
+        docker push 992382545251.dkr.ecr.us-east-1.amazonaws.com/sharon-meital/statuspage:nginx
+        docker push 992382545251.dkr.ecr.us-east-1.amazonaws.com/sharon-meital/statuspage:django
+
+    # Step 7: Install SSH Client
+    - name: Install SSH Client
+      run: sudo apt-get install -y openssh-client
+
+    # Step 8: Set Up SSH Key
+    - name: Set Up SSH Key
+      run: |
+        echo "${{ secrets.BASTION_SSH_KEY }}" > bastion_key.pem
+        chmod 600 bastion_key.pem
+
+    # Step 9: Get Bastion IP
+    - name: Get Bastion IP
+      run: |
+        BASTION_IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=sm-bastion-host" "Name=instance-state-name,Values=running" --query "Reservations[0].Instances[0].PublicIpAddress" --output text | tr -d '\n' | tr -d '\r') || { echo "Error: Failed to get bastion IP"; exit 1; }
+        echo "BASTION_IP=${BASTION_IP}" >> $GITHUB_ENV
+
+    # Step 10: Copy Helm Charts to Bastion
+    - name: Copy Helm Charts to Bastion
+      run: |
+        scp -i bastion_key.pem -r ./SM-status-page/Helm/production ubuntu@${{ env.BASTION_IP }}:/home/ubuntu/helm-charts-production
+
+    # Step 11: Update and Install Helm Charts via Bastion
+    - name: Update and Install Helm Charts via Bastion
+      run: |
+        ssh -i bastion_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@${{ env.BASTION_IP }} << 'EOF'
+          sudo apt-get update
+          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+          cd /home/ubuntu/helm-charts-production
+          # Upgrade or install the status-page Helm chart in production namespace
+          helm upgrade --install status-page ./status-page-stack -n production
+        EOF
