@@ -231,7 +231,7 @@ jobs:
     - name: Uninstall Helm Stacks via Bastion
       if: always() && steps.helm_install.outcome == 'success'
       run: |
-        ssh -i bastion_key.pem ubuntu@${{ env.BASTION_IP }} << 'EOF'
+        ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i bastion_key.pem ubuntu@${{ env.BASTION_IP }} << 'EOF'
           helm uninstall redis -n development
           helm uninstall status-page -n development  # Uninstalls all Helm releases
         EOF
