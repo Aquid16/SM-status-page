@@ -5,7 +5,7 @@ metadata:
   name: static-files-pvc-test
   namespace: {{ .Values.namespace }}
 spec:
-  storageClassName: efs-sc-test
+  storageClassName: ebs-sc-test
   accessModes:
     - ReadWriteMany
   resources:
