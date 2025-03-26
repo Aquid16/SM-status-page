@@ -146,9 +146,9 @@ jobs:
           echo "Debug: Modified status-page-stack/values.yaml"
           cat ./status-page-stack/values.yaml
           kubectl create namespace development --dry-run=client -o yaml | kubectl apply -f -
-          helm install efs ./efs-sc-stack -n development
           helm install redis ./redis-stack -n development
-          helm install status-page ./status-page-stack -n development
+          helm install efs ./efs-sc-stack -n development --set fileSystemId="${{ env.EFS_FILESYSTEM_ID }}"
+          helm install status-page ./status-page-stack -n development --set django.env.DATABASE_HOST="${{ env.RDS_ENDPOINT }}"
           ALB_HOSTNAME=$(kubectl get ingress -n development status-page-test-ingress -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
           echo "ALB_HOSTNAME=$ALB_HOSTNAME" > /home/ubuntu/alb_hostname.txt
         EOF
