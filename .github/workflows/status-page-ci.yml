@@ -121,21 +121,22 @@ jobs:
 
     - name: Copy Helm Charts to Bastion
       run: |
+        # Remove existing helm-charts directory on bastion to avoid old file leftovers
+        ssh -i bastion_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@${{ env.BASTION_IP }} "rm -rf /home/ubuntu/helm-charts"
+        # Copy the latest Helm charts
         scp -i bastion_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r ./Helm/statuspage_pr ubuntu@${{ env.BASTION_IP }}:/home/ubuntu/helm-charts
         
     - name: Update and Install Helm Charts via Bastion
       run: |
         ssh -i bastion_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@${{ env.BASTION_IP }} << 'EOF'
-          sudo apt-get update
-          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-          cd /home/ubuntu/helm-charts
+        cd /home/ubuntu/helm-charts
 
-          kubectl create namespace development --dry-run=client -o yaml | kubectl apply -f -
-          helm install redis ./redis-stack -n development
-          helm install status-page ./status-page-stack -n development
-          sleep 30 
-          ALB_HOSTNAME=$(kubectl get ingress -n development status-page-test-ingress -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
-          echo "ALB_HOSTNAME=$ALB_HOSTNAME" > /home/ubuntu/alb_hostname.txt
+        kubectl create namespace development --dry-run=client -o yaml | kubectl apply -f -
+        helm install redis ./redis-stack -n development
+        helm install status-page ./status-page-stack -n development
+        sleep 30 
+        ALB_HOSTNAME=$(kubectl get ingress -n development status-page-test-ingress -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+        echo "ALB_HOSTNAME=$ALB_HOSTNAME" > /home/ubuntu/alb_hostname.txt
         EOF
 
     - name: Fetch ALB Hostname from Bastion
