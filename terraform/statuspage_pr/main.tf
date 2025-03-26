@@ -67,6 +67,16 @@ resource "aws_ecr_repository" "statuspage_repo" {
   }
 }
 
+resource "aws_db_parameter_group" "custom_pg" {
+  name   = "sm-test-statuspage-pg"
+  family = "postgres17"
+
+  parameter {
+    name  = "rds.force_ssl"
+    value = "0"
+  }
+}
+
 # Create an RDS Instance
 resource "aws_db_instance" "statuspage_db" {
   identifier            = "sm-statuspage-test-db"
@@ -78,7 +88,7 @@ resource "aws_db_instance" "statuspage_db" {
   db_name              = "statuspage"
   username            = "statuspage"
   password            = "abcdefgh123456"
-  parameter_group_name = "default.postgres17"
+  parameter_group_name = aws_db_parameter_group.custom_pg.name
   publicly_accessible  = false
 
   # Attach to the correct VPC and security groups
