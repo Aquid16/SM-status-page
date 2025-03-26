@@ -93,6 +93,14 @@ jobs:
         # Verify Docker is installed
         docker --version
 
+    - name: Install Docker Compose
+      run: |
+        # Install Docker Compose v2 as a plugin (recommended)
+        sudo apt-get update
+        sudo apt-get install -y docker-compose-plugin
+        # Verify installation
+        docker compose version  # Note: 'docker compose' (two words) is the new command
+
     - name: Build and Push Docker Images to ECR
       run: |
         set -e
