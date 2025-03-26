@@ -105,8 +105,8 @@ jobs:
         aws ecr get-login-password --region ${{ secrets.AWS_DEFAULT_REGION }} | docker login --username AWS --password-stdin 992382545251.dkr.ecr.us-east-1.amazonaws.com
         cd docker
         docker compose build
-        docker tag docker_nginx 992382545251.dkr.ecr.us-east-1.amazonaws.com/sm-statuspage-test-repo:nginx
-        docker tag docker_django 992382545251.dkr.ecr.us-east-1.amazonaws.com/sm-statuspage-test-repo:django
+        docker tag docker-nginx 992382545251.dkr.ecr.us-east-1.amazonaws.com/sm-statuspage-test-repo:nginx
+        docker tag docker-django 992382545251.dkr.ecr.us-east-1.amazonaws.com/sm-statuspage-test-repo:django
         docker push 992382545251.dkr.ecr.us-east-1.amazonaws.com/sm-statuspage-test-repo:nginx
         docker push 992382545251.dkr.ecr.us-east-1.amazonaws.com/sm-statuspage-test-repo:django
 
