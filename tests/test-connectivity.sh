@@ -5,11 +5,12 @@ paths=(
   "/"
   "/dashboard/"
   "/dashboard/components/"
-  "/dashboard/extras/"
+  "/dashboard/components/groups/"
   "/dashboard/incidents/"
   "/dashboard/maintenances/"
   "/dashboard/subscribers/"
-  "/dashboard/user/"
+  "/dashboard/metrics/"
+  "/dashboard/user/profile/"
 )
 
 # Base domain
