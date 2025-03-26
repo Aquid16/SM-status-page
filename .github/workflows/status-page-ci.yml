@@ -181,10 +181,21 @@ jobs:
         USERNAME: ${{ secrets.TEST_USERNAME }}
         PASSWORD: ${{ secrets.TEST_PASSWORD }}
       run: |
-        echo "Waiting for environment to stabilize..." \
-        sleep 180 \
-        chmod +x test/test-connectivity.sh \
-        ./test/test-connectivity.sh 
+        echo "Waiting for environment to stabilize..." 
+        sleep 180 
+        
+        # Ensure the test script is executable
+        chmod +x test/test-connectivity.sh 
+
+        # Run the test script and capture output
+        echo "Running connectivity tests..."
+        if ./test/test-connectivity.sh; then
+          echo "Success: All connectivity tests passed!"
+        else
+          echo "Error: Connectivity tests failed!"
+          exit 1
+        fi
+        
 
     - name: Remove A Record (Alias) from Route 53
       if: always() && steps.route53_add.outcome == 'success' && env.ALB_HOSTNAME != ''
