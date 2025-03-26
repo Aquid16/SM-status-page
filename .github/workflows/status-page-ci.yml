@@ -147,9 +147,9 @@ jobs:
 
     - name: Fetch ALB Hostname from Bastion
       run: |
-        scp -i bastion_key.pem ubuntu@${{ env.BASTION_IP }}:/home/ubuntu/alb_hostname.txt ./alb_hostname.txt  # Copies the ALB hostname file back to the runner
-        ALB_HOSTNAME=$(cat ./alb_hostname.txt | grep ALB_HOSTNAME | cut -d'=' -f2)  # Extracts the hostname
-        echo "ALB_HOSTNAME=$ALB_HOSTNAME" >> $GITHUB_ENV  # Adds it to environment variables
+        scp -i bastion_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@${{ env.BASTION_IP }}:/home/ubuntu/alb_hostname.txt ./alb_hostname.txt
+        ALB_HOSTNAME=$(cat ./alb_hostname.txt | grep ALB_HOSTNAME | cut -d'=' -f2)
+        echo "ALB_HOSTNAME=$ALB_HOSTNAME" >> $GITHUB_ENV
 
     - name: Add A Record (Alias) to Route 53
       id: route53_add
