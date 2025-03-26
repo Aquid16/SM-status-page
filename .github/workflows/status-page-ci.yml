@@ -127,7 +127,7 @@ jobs:
 
     - name: Copy Helm Charts to Bastion
       run: |
-        scp -i bastion_key.pem -r ./Helm/statuspage_pr ubuntu@${{ env.BASTION_IP }}:/home/ubuntu/helm-charts
+        scp -i bastion_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r ./Helm/statuspage_pr ubuntu@${{ env.BASTION_IP }}:/home/ubuntu/helm-charts
         
     - name: Update and Install Helm Charts via Bastion
       id: helm_install
