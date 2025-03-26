@@ -52,6 +52,7 @@ data "aws_security_group" "sg" {
 # Create a Private ECR Repository
 resource "aws_ecr_repository" "statuspage_repo" {
   name = "sm-statuspage-test-repo"
+  force_delete = true
   image_scanning_configuration {
     scan_on_push = true
   }
