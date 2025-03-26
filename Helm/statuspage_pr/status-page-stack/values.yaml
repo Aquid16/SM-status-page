@@ -14,7 +14,7 @@ django:
   env:
     DATABASE_NAME: statuspage
     DATABASE_USER: statuspage
-    DATABASE_HOST: sm-statuspage-postgresql.cx248m4we6k7.us-east-1.rds.amazonaws.com
+    DATABASE_HOST: sm-statuspage-test-db.cx248m4we6k7.us-east-1.rds.amazonaws.com
     DATABASE_PORT: "5432"
     REDIS_HOST: redis
     REDIS_PORT: "6379"
