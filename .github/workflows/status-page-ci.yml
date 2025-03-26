@@ -67,7 +67,12 @@ jobs:
       run: |
         cd ./terraform/statuspage_pr
         sudo apt-get update && sudo apt-get install -y jq
-        RDS_ENDPOINT=$(terraform output -json rds_endpoint | jq -r .) || { echo "Error: rds_endpoint output not found"; exit 1; }
+        export TF_LOG=ERROR
+        terraform output -json rds_endpoint > raw_output.json
+        cat raw_output.json
+        sed -n '/^{/,/^}/p' raw_output.json > rds_output.json
+        RDS_ENDPOINT=$(cat rds_output.json | jq -r .) || { echo "Error: Failed to parse rds_endpoint"; exit 1; }
+        echo "RDS_ENDPOINT=$RDS_ENDPOINT" >> $GITHUB_ENV
         EFS_FILESYSTEM_ID=$(terraform output -json efs_filesystem_id | jq -r .) || { echo "Error: efs_filesystem_id output not found"; exit 1; }
         BASTION_IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=sm-bastion-host" "Name=instance-state-name,Values=running" --query "Reservations[0].Instances[0].PublicIpAddress" --output text | tr -d '\n' | tr -d '\r')
         if [ -z "$BASTION_IP" ]; then
