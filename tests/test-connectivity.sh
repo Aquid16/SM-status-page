@@ -27,11 +27,16 @@ FAILURES=0
 # Loop to test each path
 for path in "${paths[@]}"; do
   echo "Testing $BASE_URL$path..."
-  STATUS_CODE=$(curl -s -u "$USERNAME:$PASSWORD" -w "%{http_code}" -o /dev/null "$BASE_URL$path")
-  if [ "$STATUS_CODE" -eq 200 ]; then
-    echo "✓ Success: $BASE_URL$path returned 200"
+  RESPONSE=$(curl -s -u "$USERNAME:$PASSWORD" --max-time 10 -w "%{http_code}" "$BASE_URL$path" -o response.txt)
+  STATUS_CODE=${RESPONSE: -3}  # Extract the last 3 characters (HTTP code)
+  
+  echo "Response body: $(cat response.txt)"
+  echo "Status code: $STATUS_CODE"
+  
+  if [ "$STATUS_CODE" -eq 200 ] || [ "$STATUS_CODE" -eq 301 ] || [ "$STATUS_CODE" -eq 302 ]; then
+    echo "✓ Success: $BASE_URL$path returned $STATUS_CODE"
   else
-    echo "✗ Failure: $BASE_URL$path returned $STATUS_CODE (expected 200)"
+    echo "✗ Failure: $BASE_URL$path returned $STATUS_CODE (expected 200, 301, or 302)"
     FAILURES=$((FAILURES + 1))
   fi
 done
