@@ -135,8 +135,16 @@ jobs:
           sudo apt-get update
           curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
           cd /home/ubuntu/helm-charts
-          sed -i "s|fileSystemId:.*|fileSystemId: ${{ env.EFS_FILESYSTEM_ID }}|" ./efs-sc-stack/values.yaml
+          if [ ! -f ./status-page-stack/values.yaml ]; then
+            echo "Error: status-page-stack/values.yaml not found"
+            ls -la
+            exit 1
+          fi
+          echo "Debug: Original status-page-stack/values.yaml"
+          cat ./status-page-stack/values.yaml
           sed -i "s|DATABASE_HOST:.*|DATABASE_HOST: ${{ env.RDS_ENDPOINT }}|" ./status-page-stack/values.yaml
+          echo "Debug: Modified status-page-stack/values.yaml"
+          cat ./status-page-stack/values.yaml
           kubectl create namespace development --dry-run=client -o yaml | kubectl apply -f -
           helm install efs ./efs-sc-stack -n development
           helm install redis ./redis-stack -n development
