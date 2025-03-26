@@ -39,7 +39,7 @@ jobs:
         terraform plan -out=tfplan 
 
     - name: Apply Terraform
-      id: apply
+      id: terraform_apply
       run: |
         cd ./terraform/statuspage_pr
         terraform apply -auto-approve -input=false tfplan
@@ -130,6 +130,7 @@ jobs:
         scp -i bastion_key.pem -r ./Helm/statuspage_pr ubuntu@${{ env.BASTION_IP }}:/home/ubuntu/helm-charts
         
     - name: Update and Install Helm Charts via Bastion
+      id: helm_install
       run: |
         ssh -i bastion_key.pem ubuntu@${{ env.BASTION_IP }} << 'EOF'
           sudo apt-get update  # Updates package lists on the bastion
@@ -162,6 +163,7 @@ jobs:
         echo "ALB_HOSTNAME=$ALB_HOSTNAME" >> $GITHUB_ENV  # Adds it to environment variables
 
     - name: Add A Record (Alias) to Route 53
+      id: route53_add
       run: |
         cat <<EOF > dns-record.json
         {
@@ -193,7 +195,7 @@ jobs:
         ./test/test-connectivity.sh 
 
     - name: Remove A Record (Alias) from Route 53
-      #if: always() && steps.apply.outcome == 'success' && env.ALB_HOSTNAME != ''  # Runs if apply succeeded and ALB hostname exists
+      if: always() && steps.route53_add.outcome == 'success' && env.ALB_HOSTNAME != ''
       run: |
         cat <<EOF > dns-record.json
         {
@@ -215,7 +217,7 @@ jobs:
         aws route53 change-resource-record-sets --hosted-zone-id ${{ secrets.HOSTED_ZONE_ID }} --change-batch file://dns-record.json
 
     - name: Uninstall Helm Stacks via Bastion
-      #if: always() && steps.apply.outcome == 'success'  # Runs only if terraform apply succeeded
+      if: always() && steps.helm_install.outcome == 'success'
       run: |
         ssh -i bastion_key.pem ubuntu@${{ env.BASTION_IP }} << 'EOF'
           helm uninstall efs -n development
@@ -224,7 +226,7 @@ jobs:
         EOF
         
     - name: Destroy Terraform
-      if: always() && steps.apply.outcome == 'success'  # Runs only if terraform apply succeeded
+      if: always() && steps.terraform_apply.outcome == 'success'
       run: |
         cd ./terraform/statuspage_pr
         terraform destroy -auto-approve -input=false 
