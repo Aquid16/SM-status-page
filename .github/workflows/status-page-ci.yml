@@ -95,26 +95,18 @@ jobs:
 
     - name: Install Docker Compose
       run: |
-        # Install Docker Compose v2 as a plugin (recommended)
         sudo apt-get update
         sudo apt-get install -y docker-compose-plugin
-        # Verify installation
-        docker compose version  # Note: 'docker compose' (two words) is the new command
+        docker compose version || { echo "Error: Docker Compose plugin installation failed"; exit 1; }
 
     - name: Build and Push Docker Images to ECR
       run: |
         set -e
-        # Logs in to AWS ECR
         aws ecr get-login-password --region ${{ secrets.AWS_DEFAULT_REGION }} | docker login --username AWS --password-stdin 992382545251.dkr.ecr.us-east-1.amazonaws.com
-
         cd docker
-        docker-compose -f docker-compose.yml build
-
-        # Tags the images for ECR
+        docker compose -f docker-compose.yml build
         docker tag ubuntu-nginx 992382545251.dkr.ecr.us-east-1.amazonaws.com/sm-statuspage-test-repo:nginx
         docker tag ubuntu-django 992382545251.dkr.ecr.us-east-1.amazonaws.com/sm-statuspage-test-repo:django
-
-        # Pushes the images to ECR
         docker push 992382545251.dkr.ecr.us-east-1.amazonaws.com/sm-statuspage-test-repo:nginx
         docker push 992382545251.dkr.ecr.us-east-1.amazonaws.com/sm-statuspage-test-repo:django
 
