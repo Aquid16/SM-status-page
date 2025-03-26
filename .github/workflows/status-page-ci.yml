@@ -63,16 +63,8 @@ jobs:
         cd ./terraform/statuspage_pr
         terraform apply -auto-approve -input=false tfplan
 
-    - name: Get EFS filesystem ID and Bastion Host IP
-      run: |
-        # Get EFS filesystem ID by name tag using AWS CLI
-        EFS_FILESYSTEM_ID=$(aws efs describe-file-systems --query "FileSystems[?Tags[?Key=='Name' && Value=='sm-efs-test']].FileSystemId" --output text | tr -d '\n' | tr -d '\r')
-        if [ -z "$EFS_FILESYSTEM_ID" ]; then
-          echo "Error: EFS_FILESYSTEM_ID is empty; no EFS found with tag Name=sm-efs-test"
-          exit 1
-        fi
-        echo "EFS_FILESYSTEM_ID=$EFS_FILESYSTEM_ID" >> $GITHUB_ENV
-        
+    - name: Get Bastion Host IP
+      run: |        
         BASTION_IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=sm-bastion-host" "Name=instance-state-name,Values=running" --query "Reservations[0].Instances[0].PublicIpAddress" --output text | tr -d '\n' | tr -d '\r')
         if [ -z "$BASTION_IP" ]; then
           echo "Error: BASTION_IP is empty; no instance found with tag Name=sm-bastion-host"
@@ -80,8 +72,6 @@ jobs:
         fi
 
         echo "BASTION_IP=$BASTION_IP" >> $GITHUB_ENV
-        
-        echo "Debug: EFS_FILESYSTEM_ID=$EFS_FILESYSTEM_ID"
         echo "Debug: BASTION_IP=$BASTION_IP"
 
     - name: Install Docker
@@ -211,7 +201,6 @@ jobs:
       if: always() && steps.helm_install.outcome == 'success'
       run: |
         ssh -i bastion_key.pem ubuntu@${{ env.BASTION_IP }} << 'EOF'
-          helm uninstall efs -n development
           helm uninstall redis -n development
           helm uninstall status-page -n development  # Uninstalls all Helm releases
         EOF
