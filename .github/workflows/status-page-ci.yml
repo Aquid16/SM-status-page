@@ -140,7 +140,7 @@ jobs:
           kubectl create namespace development --dry-run=client -o yaml | kubectl apply -f -
           helm install efs ./efs-sc-stack -n development
           helm install redis ./redis-stack -n development
-          helm install status-page oci://992382545251.dkr.ecr.us-east-1.amazonaws.com/sm-statuspage-test-repo -n development --version latest
+          helm install status-page ./status-page-stack -n development
           ALB_HOSTNAME=$(kubectl get ingress -n development statuspage-ingress -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
           echo "ALB_HOSTNAME=$ALB_HOSTNAME" > /home/ubuntu/alb_hostname.txt
         EOF
