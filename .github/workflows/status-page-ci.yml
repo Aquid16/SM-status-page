@@ -185,11 +185,11 @@ jobs:
         sleep 180 
         
         # Ensure the test script is executable
-        chmod +x test/test-connectivity.sh 
+        chmod +x tests/test-connectivity.sh 
 
         # Run the test script and capture output
         echo "Running connectivity tests..."
-        if ./test/test-connectivity.sh; then
+        if ./tests/test-connectivity.sh; then
           echo "Success: All connectivity tests passed!"
         else
           echo "Error: Connectivity tests failed!"
