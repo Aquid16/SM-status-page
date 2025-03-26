@@ -33,7 +33,7 @@ spec:
         imagePullPolicy: {{ .Values.django.image.pullPolicy }}
         envFrom:
         - configMapRef:
-            name: django-config
+            name: django-test-config
         env:
         - name: DATABASE_PASSWORD
           valueFrom:
@@ -45,7 +45,6 @@ spec:
             secretKeyRef:
               name: django-test-secret
               key: DJANGO_SUPERUSER_PASSWORD
-        
         volumeMounts:
         - name: status-page-venv
           mountPath: /opt/status-page/venv

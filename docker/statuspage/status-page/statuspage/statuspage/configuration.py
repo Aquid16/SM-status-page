@@ -8,7 +8,7 @@ import os
 # write access to the server via any other hostnames. The first FQDN in the list will be treated as the preferred name.
 #
 # Example: ALLOWED_HOSTS = ['status-page.example.com', 'status-page.internal.local']
-ALLOWED_HOSTS = ['sm-status-page.com', 'test-sm-status-page.click']
+ALLOWED_HOSTS = ['sm-status-page.com', 'test.sm-status-page.com']
 
 # PostgreSQL database configuration. See the Django documentation for a complete list of available parameters:
 #   https://docs.djangoproject.com/en/stable/ref/settings/#databases
@@ -152,7 +152,7 @@ RQ_DEFAULT_TIMEOUT = 300
 
 # The name to use for the csrf token cookie.
 CSRF_COOKIE_NAME = 'csrftoken'
-CSRF_TRUSTED_ORIGINS = ['https://sm-status-page.com','https://test-sm-status-page.click']
+CSRF_TRUSTED_ORIGINS = ['https://sm-status-page.com', 'https://test.sm-status-page.com']
 
 # The name to use for the session cookie.
 SESSION_COOKIE_NAME = 'sessionid'
