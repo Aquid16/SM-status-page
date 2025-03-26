@@ -192,6 +192,7 @@ jobs:
         ./test/test-connectivity.sh 
 
     - name: Remove A Record (Alias) from Route 53
+      if: always() && steps.apply.outcome == 'success' && env.ALB_HOSTNAME != ''  # Runs if apply succeeded and ALB hostname exists
       run: |
         cat <<EOF > dns-record.json
         {
@@ -213,6 +214,7 @@ jobs:
         aws route53 change-resource-record-sets --hosted-zone-id ${{ secrets.HOSTED_ZONE_ID }} --change-batch file://dns-record.json
 
     - name: Uninstall Helm Stacks via Bastion
+      if: always() && steps.apply.outcome == 'success'  # Runs only if terraform apply succeeded
       run: |
         ssh -i bastion_key.pem ubuntu@${{ env.BASTION_IP }} << 'EOF'
           helm uninstall efs -n development
@@ -221,6 +223,7 @@ jobs:
         EOF
         
     - name: Destroy Terraform
+      if: always() && steps.apply.outcome == 'success'  # Runs only if terraform apply succeeded
       run: |
         cd ./terraform/statuspage_pr
         terraform destroy -auto-approve -input=false 
