@@ -12,8 +12,6 @@ metadata:
     alb.ingress.kubernetes.io/load-balancer-name: "sm-test-application-load-balancer"
     alb.ingress.kubernetes.io/backend-protocol: HTTP
     alb.ingress.kubernetes.io/target-type: "ip"
-    alb.ingress.kubernetes.io/group.name: "sm-status-page"
-    alb.ingress.kubernetes.io/group.order: '1'
     alb.ingress.kubernetes.io/success-codes: "200-499"
 
 spec:
