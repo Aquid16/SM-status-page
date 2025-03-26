@@ -192,22 +192,30 @@ jobs:
         cat <<EOF > dns-record.json
         {
           "Comment": "Removing statuspage A record",
-          "Changes": [{
-            "Action": "DELETE",
-            "ResourceRecordSet": {
-              "Name": ${{ secrets.HOSTED_ZONE_NAME }},
-              "Type": "A",
-              "AliasTarget": {
-                "HostedZoneId": ${{ secrets.HOSTED_ZONE_ID }},
-                "DNSName": "$ALB_HOSTNAME",
-                "EvaluateTargetHealth": false
+          "Changes": [
+            {
+              "Action": "DELETE",
+              "ResourceRecordSet": {
+                "Name": "${{ secrets.HOSTED_ZONE_NAME }}",
+                "Type": "A",
+                "AliasTarget": {
+                  "HostedZoneId": "Z35SXDOTRQ7X7K",
+                  "DNSName": "dualstack.${{ env.ALB_HOSTNAME }}",
+                  "EvaluateTargetHealth": true
+                }
               }
             }
-          }]
+          ]
         }
         EOF
-        aws route53 change-resource-record-sets --hosted-zone-id ${{ secrets.HOSTED_ZONE_ID }} --change-batch file://dns-record.json
-
+    
+        # Debug: Show the generated JSON
+        echo "Debug: Generated dns-record.json for removal:"
+        cat dns-record.json
+    
+        # Apply the Route 53 change
+        aws route53 change-resource-record-sets --hosted-zone-id ${{ secrets.HOSTED_ZONE_ID }} --change-batch file://dns-record.json || true
+        
     - name: Uninstall Helm Stacks via Bastion
       if: always() && steps.helm_install.outcome == 'success'
       run: |
