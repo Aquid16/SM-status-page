@@ -184,13 +184,10 @@ jobs:
       run: |
         echo "Waiting for environment to stabilize..." 
         sleep 180 
-        
-        # Ensure the test script is executable
-        chmod +x tests/test-connectivity.sh 
-
+      
         # Run the test script and capture output
         echo "Running connectivity tests..."
-        if ./tests/test-connectivity.sh; then
+        if python tests/test-connectivity.py; then
           echo "Success: All connectivity tests passed!"
         else
           echo "Error: Connectivity tests failed!"
