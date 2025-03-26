@@ -127,6 +127,7 @@ jobs:
         scp -i bastion_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r ./Helm/statuspage_pr ubuntu@${{ env.BASTION_IP }}:/home/ubuntu/helm-charts
         
     - name: Update and Install Helm Charts via Bastion
+      id: helm_install
       run: |
         ssh -i bastion_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@${{ env.BASTION_IP }} << 'EOF'
         cd /home/ubuntu/helm-charts
