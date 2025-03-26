@@ -32,12 +32,26 @@ data "terraform_remote_state" "security_groups" {
   }
 }
 
+# Get the current AWS caller identity
+data "aws_caller_identity" "current" {}
+
+# Get the IAM user details based on the caller identity
+data "aws_iam_user" "current_user" {
+  user_name = element(split("/", data.aws_caller_identity.current.arn), 1)
+}
+
+# Define the owner dynamically
+locals {
+  owner = data.aws_iam_user.current_user.user_name
+}
+
 
 resource "aws_db_subnet_group" "rds_subnet_group" {
   name       = "${var.identifier}-subnet-group"
   subnet_ids = data.terraform_remote_state.vpc.outputs.private_subnets
   tags = {
     Name  = "${var.identifier}-subnet-group"
+    Owner = local.owner
   }
 }
 
@@ -52,6 +66,7 @@ resource "aws_db_parameter_group" "custom_pg" {
 
   tags = {
     Name = "${var.identifier}-pg"
+    Owner = local.owner
   }
 }
 
@@ -79,5 +94,6 @@ module "rds" {
   
   tags = {
     Name  = var.identifier
+    Owner = local.owner
   }
 }

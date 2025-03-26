@@ -33,6 +33,18 @@ data "terraform_remote_state" "security_groups" {
   }
 }
 
+# Get the current AWS caller identity
+data "aws_caller_identity" "current" {}
+
+# Get the IAM user details based on the caller identity
+data "aws_iam_user" "current_user" {
+  user_name = element(split("/", data.aws_caller_identity.current.arn), 1)
+}
+
+# Define the owner dynamically
+locals {
+  owner = data.aws_iam_user.current_user.user_name
+}
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
@@ -67,5 +79,6 @@ module "eks" {
 
   tags = {
     Name  = var.cluster_name
+    Owner = local.owner
   }
 }

@@ -23,14 +23,47 @@ data "terraform_remote_state" "vpc" {
   }
 }
 
-data "terraform_remote_state" "bastion" {
-  backend = "s3"
-  config = {
-    bucket = "sharon-meital-terraform-state-bucket"
-    key    = "bastion/terraform.tfstate"
-    region = "us-east-1"
+# Get the current AWS caller identity
+data "aws_caller_identity" "current" {}
+
+# Get the IAM user details based on the caller identity
+data "aws_iam_user" "current_user" {
+  user_name = element(split("/", data.aws_caller_identity.current.arn), 1)
+}
+
+# Define the owner dynamically
+locals {
+  owner = data.aws_iam_user.current_user.user_name
+}
+
+
+resource "aws_security_group" "bastion_sg" {
+  vpc_id = data.terraform_remote_state.vpc.outputs.vpc_id
+  name   = "sm-bastion-sg"
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow SSH access to Bastion"
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow all outbound traffic"
+  }
+
+  tags = {
+    Name  = "sm-bastion-sg"
+    Owner = local.owner
   }
 }
+
+
 
 resource "aws_security_group" "admin_sg" {
   vpc_id = data.terraform_remote_state.vpc.outputs.vpc_id
@@ -56,7 +89,7 @@ resource "aws_security_group" "admin_sg" {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    security_groups = [data.terraform_remote_state.bastion.outputs.bastion_sg_id]
+    security_groups = [aws_security_group.bastion_sg.id]
     description = "Allow Kubernetes API access from Bastion Host"
   }
 
@@ -86,6 +119,7 @@ resource "aws_security_group" "admin_sg" {
 
   tags = {
     Name  = "sm-admin-sg"
+    Owner = local.owner
   }
 }
 
@@ -119,5 +153,6 @@ resource "aws_security_group" "user_sg" {
 
   tags = {
     Name  = "sm-user-sg"
+    Owner = local.owner
   }
 }
