@@ -13,7 +13,7 @@ paths=(
 )
 
 # Base domain
-BASE_URL="https://test-sm-status-page.click"
+BASE_URL="https://test.sm-status-page.com"
 
 # Check if environment variables are set
 if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ]; then
