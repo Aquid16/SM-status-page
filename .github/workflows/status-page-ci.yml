@@ -39,6 +39,7 @@ jobs:
         terraform plan -out=tfplan 
 
     - name: Apply Terraform
+      id: apply
       run: |
         cd ./terraform/statuspage_pr
         terraform apply -auto-approve -input=false tfplan
