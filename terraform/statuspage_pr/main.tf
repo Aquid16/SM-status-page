@@ -28,7 +28,7 @@ data "aws_subnets" "private" {
 data "aws_security_group" "sg" {
   filter {
     name   = "group-name"
-    values = ["sm-user-sg"] # Replace with the actual SG name
+    values = ["sm-admin-sg"] 
   }
 
   filter {
