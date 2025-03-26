@@ -113,19 +113,29 @@ data "aws_eks_cluster_auth" "cluster" {
 }
 
 # --- HELM PROVIDER ---
+#data "aws_ecr_authorization_token" "example" {}
+
 provider "helm" {
   kubernetes {
-    host                   = data.aws_eks_cluster.cluster.endpoint
-    token                  = data.aws_eks_cluster_auth.cluster.token
+    config_path = "~/.kube/config"
+    host        = data.aws_eks_cluster.cluster.endpoint
+    token       = data.aws_eks_cluster_auth.cluster.token
     cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority[0].data)
   }
 }
+
+#resource "helm_repository" "my_repo" {
+#  name     = "sharon-meital/statuspage"
+#  url      = "https://992382545251.dkr.ecr.us-east-1.amazonaws.com"
+#  username = data.aws_ecr_authorization_token.example.username
+#  password = data.aws_ecr_authorization_token.example.password
+#}
 
 # --- REDIS ---
 resource "helm_release" "redis" {
   name       = "redis"
   namespace  = "development"
-  chart      = "./Helm/statuspage_pr/redis-stack"
+  chart      = "https://github.com/Aquid16/SM-status-page/raw/Development/Helm/statuspage_pr/redis-stack" 
   wait       = true
 }
 
@@ -133,22 +143,24 @@ resource "helm_release" "redis" {
 resource "helm_release" "efs" {
   name       = "efs"
   namespace  = "development"
-  chart      = "./Helm/statuspage_pr/efs-sc-stack"
+  chart      = "https://github.com/Aquid16/SM-status-page/raw/Development/Helm/statuspage_pr/efs-sc-stack/"
   wait       = true
+
+  set {
+    name  = "EFS_FILE_SYSTEM_ID"
+    value = aws_efs_file_system.statuspage_efs.id
+  }
 }
 
 # --- STATUS PAGE HELM RELEASE ---
 resource "helm_release" "statuspage" {
   name       = "status-page"
   namespace  = "development"
-  chart      = "oci://992382545251.dkr.ecr.us-east-1.amazonaws.com/sharon-meital/statuspage"
-  version    = "latest"
+  chart      = "https://github.com/Aquid16/SM-status-page/raw/Development/Helm/statuspage_pr/status-page-stack/"
   wait       = true
 
-  values = [
-    templatefile("${path.module}/values.yaml.tpl", {
-      rds_endpoint      = aws_db_instance.statuspage_db.endpoint
-      efs_filesystem_id = aws_efs_file_system.statuspage_efs.id
-    })
-  ]
+  set {
+    name  = "DATABASE_HOST"
+    value = aws_db_instance.statuspage_db.endpoint
+  }
 }
