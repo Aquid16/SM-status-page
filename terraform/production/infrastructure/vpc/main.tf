@@ -14,6 +14,19 @@ terraform {
   }
 }
 
+# Get the current AWS caller identity
+data "aws_caller_identity" "current" {}
+
+# Get the IAM user details based on the caller identity
+data "aws_iam_user" "current_user" {
+  user_name = element(split("/", data.aws_caller_identity.current.arn), 1)
+}
+
+# Define the owner dynamically
+locals {
+  owner = data.aws_iam_user.current_user.user_name
+}
+
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "~> 5.0"
@@ -29,10 +42,12 @@ module "vpc" {
   single_nat_gateway   = true
   nat_gateway_tags = {
     Name = "sm-statuspage-nat"
+    Owner = local.owner
   }
 
   igw_tags = {
     Name = "sm-statuspage-igw"
+    Owner = local.owner
   }
 
   enable_vpn_gateway   = false
@@ -41,18 +56,22 @@ module "vpc" {
 
   public_subnet_tags = {
     "Name" = "${var.vpc_name}-public"
+    Owner = local.owner
   }
 
   private_subnet_tags = {
     "Name" = "${var.vpc_name}-private"
+    Owner = local.owner
   }
 
   public_route_table_tags = {
     Name = "${var.vpc_name}-public-rt"
+    Owner = local.owner
   }
 
   private_route_table_tags = {
     Name = "${var.vpc_name}-private-rt"
+    Owner = local.owner
   }
 
   manage_default_vpc = false
@@ -62,5 +81,6 @@ module "vpc" {
 
   tags = {
     Name  = var.vpc_name
+    Owner = local.owner
   }
 }
