@@ -37,17 +37,17 @@ data "aws_security_group" "sg" {
   }
 }
 
-data "aws_instance" "bastion" {
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.sm_statuspage.id]
-  }
+#data "aws_instance" "bastion" {
+#  filter {
+#    name   = "vpc-id"
+#    values = [data.aws_vpc.sm_statuspage.id]
+#  }
 
-  filter {
-    name   = "tag:Name"
-    values = ["sm-bastion-host"]
-  }
-}
+#  filter {
+#    name   = "tag:Name"
+#    values = ["sm-bastion-host"]
+#  }
+#}
 
 # Create a Private ECR Repository
 resource "aws_ecr_repository" "statuspage_repo" {
