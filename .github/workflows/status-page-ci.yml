@@ -66,8 +66,9 @@ jobs:
     - name: Get Terraform Outputs
       run: |
         cd ./terraform/statuspage_pr
-        RDS_ENDPOINT=$(terraform output -raw rds_endpoint | tr -d '\n' | tr -d '\r') || { echo "Error: rds_endpoint output not found"; exit 1; }
-        EFS_FILESYSTEM_ID=$(terraform output -raw efs_filesystem_id | tr -d '\n' | tr -d '\r') || { echo "Error: efs_filesystem_id output not found"; exit 1; }
+        sudo apt-get update && sudo apt-get install -y jq
+        RDS_ENDPOINT=$(terraform output -json rds_endpoint | jq -r .) || { echo "Error: rds_endpoint output not found"; exit 1; }
+        EFS_FILESYSTEM_ID=$(terraform output -json efs_filesystem_id | jq -r .) || { echo "Error: efs_filesystem_id output not found"; exit 1; }
         BASTION_IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=sm-bastion-host" "Name=instance-state-name,Values=running" --query "Reservations[0].Instances[0].PublicIpAddress" --output text | tr -d '\n' | tr -d '\r')
         if [ -z "$BASTION_IP" ]; then
           echo "Error: BASTION_IP is empty; no instance found with tag Name=sm-bastion-host"
