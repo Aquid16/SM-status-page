@@ -60,7 +60,7 @@ for path in paths:
         status_code = response.status_code
         response_body = response.text
         
-        print(f"Response body: {response_body}")
+        #print(f"Response body: {response_body}")
         print(f"Status code: {status_code}")
         
         if status_code in [200, 301, 302]:
