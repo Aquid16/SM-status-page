@@ -28,9 +28,16 @@ if not USERNAME or not PASSWORD:
 # Create a Session instance to save cookies
 session = requests.Session()
 
+# Get CSRF Token
+response = session.get(login_url)
+csrf_token = session.cookies.get("csrftoken")
+if not csrf_token:
+    print("Failed to get CSRF token")
+    sys.exit(1)
+
 # Log in to the server
 login_url = f"{BASE_URL}/dashboard/login/"  # Adjust the path to your login page
-response = session.post(login_url, data={"username": USERNAME, "password": PASSWORD})
+response = session.post(login_url, data={"username": USERNAME, "password": PASSWORD, "csrfmiddlewaretoken": csrf_token})
 
 if response.status_code != 200:
     print(f"Login failed with status code {response.status_code}")
