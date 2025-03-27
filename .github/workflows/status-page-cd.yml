@@ -84,10 +84,12 @@ jobs:
     # Copy Helm Charts to Bastion
     - name: Copy Helm Charts to Bastion
       run: |
+        
         # Remove existing helm-charts directory on bastion to avoid old file leftovers
         ssh -i bastion_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@${{ env.BASTION_IP }} "rm -rf /home/ubuntu/helm-charts-production"
-        scp -i bastion_key.pem -r ./SM-status-page/Helm/production ubuntu@${{ env.BASTION_IP }}:/home/ubuntu/helm-charts-production
-
+        # Copy the latest Helm charts
+        scp -i bastion_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r ./Helm/production ubuntu@${{ env.BASTION_IP }}:/home/ubuntu/helm-charts-production
+    
     # Update and Install Helm Charts via Bastion
     - name: Update and Install Helm Charts via Bastion
       run: |
