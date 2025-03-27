@@ -127,10 +127,18 @@ resource "aws_instance" "bastion" {
               chmod +x create-alb-irsa.sh
               ./create-alb-irsa.sh
 
-              # Install Helm charts from the Git repository
+              # Install Helm charts from the Git repository - status page
               helm install efs efs-sc-stack --set fileSystemId=${data.terraform_remote_state.efs.outputs.efs_id}
               helm install status-page status-page-stack
               EOF
+
+              # Install Helm charts from the Git repository - observability
+              cd ~/SM-status-page/Helm/observability/observability-stack
+              helm install observability ./ -f values.yaml -f values-loki.yaml -f values-fluent-bit.yaml --namespace observability --create-namespace
+              EOF
+              
+
+
   tags = {
     Name = "sm-bastion-host"
     Owner = local.owner
@@ -153,10 +161,25 @@ data "aws_lb" "eks_alb" {
   }
 }
 
-# Create the Route 53 A record with alias to ALB
+# Create the Route 53 A record with alias to ALB - statuspage
 resource "aws_route53_record" "sm_status_page" {
   zone_id = data.aws_route53_zone.status_page.zone_id
   name    = "sm-status-page.com"
+  type    = "A"
+
+  alias {
+    name                   = data.aws_lb.eks_alb.dns_name
+    zone_id                = data.aws_lb.eks_alb.zone_id
+    evaluate_target_health = true
+  }
+
+  depends_on = [data.aws_lb.eks_alb]
+}
+
+# Create the Route 53 A record with alias to ALB - grafana
+resource "aws_route53_record" "sm_status_page" {
+  zone_id = data.aws_route53_zone.status_page.zone_id
+  name    = "grafana.sm-status-page.com"
   type    = "A"
 
   alias {
