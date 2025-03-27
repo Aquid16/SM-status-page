@@ -7,11 +7,11 @@ jobs:
   cd:
     runs-on: ubuntu-latest
     steps:
-    # Step 1: Checkout repository
+    # Checkout repository
     - name: Checkout repo
       uses: actions/checkout@v3
 
-    # Step 2: Install AWS CLI
+    # Install AWS CLI
     - name: Install AWS CLI
       run: |
         sudo apt-get update
@@ -21,7 +21,7 @@ jobs:
         sudo ./aws/install --update
         aws --version
 
-    # Step 3: Configure AWS Credentials
+    # Configure AWS Credentials
     - name: Configure AWS Credentials
       run: |
         aws configure set aws_access_key_id "${{ secrets.AWS_ACCESS_KEY_ID }}"
@@ -29,7 +29,7 @@ jobs:
         aws configure set default.region "${{ secrets.AWS_DEFAULT_REGION }}"
         aws sts get-caller-identity 
 
-    # Step 4: Install Docker
+    # Install Docker
     - name: Install Docker
       run: |
         sudo apt-get update
@@ -42,14 +42,14 @@ jobs:
         sudo apt-get install -y docker-ce docker-ce-cli containerd.io
         docker --version
 
-    # Step 5: Install Docker Compose
+    # Install Docker Compose
     - name: Install Docker Compose
       run: |
         sudo apt-get update
         sudo apt-get install -y docker-compose-plugin
         docker compose version || { echo "Error: Docker Compose plugin installation failed"; exit 1; }
 
-    # Step 6: Build and Push Docker Images to ECR
+    # Build and Push Docker Images to ECR
     - name: Build and Push Docker Images to ECR
       run: |
         set -e
@@ -59,40 +59,40 @@ jobs:
         # Build images from docker-compose.yml
         docker compose -f docker-compose.yml build
         # Tag images for production ECR repository
-        docker tag docker_nginx 992382545251.dkr.ecr.us-east-1.amazonaws.com/sharon-meital/statuspage:nginx
-        docker tag docker_django 992382545251.dkr.ecr.us-east-1.amazonaws.com/sharon-meital/statuspage:django
+        docker tag docker-nginx 992382545251.dkr.ecr.us-east-1.amazonaws.com/sharon-meital/statuspage:nginx
+        docker tag docker-django 992382545251.dkr.ecr.us-east-1.amazonaws.com/sharon-meital/statuspage:django
         # Push images to ECR
         docker push 992382545251.dkr.ecr.us-east-1.amazonaws.com/sharon-meital/statuspage:nginx
         docker push 992382545251.dkr.ecr.us-east-1.amazonaws.com/sharon-meital/statuspage:django
-
-    # Step 7: Install SSH Client
+    
+    # Install SSH Client
     - name: Install SSH Client
       run: sudo apt-get install -y openssh-client
 
-    # Step 8: Set Up SSH Key
+    # Set Up SSH Key
     - name: Set Up SSH Key
       run: |
         echo "${{ secrets.BASTION_SSH_KEY }}" > bastion_key.pem
         chmod 600 bastion_key.pem
 
-    # Step 9: Get Bastion IP
+    # Get Bastion IP
     - name: Get Bastion IP
       run: |
         BASTION_IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=sm-bastion-host" "Name=instance-state-name,Values=running" --query "Reservations[0].Instances[0].PublicIpAddress" --output text | tr -d '\n' | tr -d '\r') || { echo "Error: Failed to get bastion IP"; exit 1; }
         echo "BASTION_IP=${BASTION_IP}" >> $GITHUB_ENV
 
-    # Step 10: Copy Helm Charts to Bastion
+    # Copy Helm Charts to Bastion
     - name: Copy Helm Charts to Bastion
       run: |
+        # Remove existing helm-charts directory on bastion to avoid old file leftovers
+        ssh -i bastion_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@${{ env.BASTION_IP }} "rm -rf /home/ubuntu/helm-charts-production"
         scp -i bastion_key.pem -r ./SM-status-page/Helm/production ubuntu@${{ env.BASTION_IP }}:/home/ubuntu/helm-charts-production
 
-    # Step 11: Update and Install Helm Charts via Bastion
+    # Update and Install Helm Charts via Bastion
     - name: Update and Install Helm Charts via Bastion
       run: |
         ssh -i bastion_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@${{ env.BASTION_IP }} << 'EOF'
-          sudo apt-get update
-          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-          cd /home/ubuntu/helm-charts-production
-          # Upgrade or install the status-page Helm chart in production namespace
-          helm upgrade --install status-page ./status-page-stack -n production
+        cd /home/ubuntu/helm-charts-production
+        # Upgrade or install the status-page Helm chart in production namespace
+        helm upgrade --install status-page ./status-page-stack -n production
         EOF
