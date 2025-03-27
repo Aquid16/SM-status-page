@@ -30,3 +30,8 @@ updates:
       interval: "weekly"
     target-branch: "Development"
 
+  - package-ecosystem: "terraform"
+    directory: "/terraform"
+    schedule:
+      interval: "weekly"
+    target-branch: "Development"
