@@ -287,7 +287,7 @@ jobs:
       run: |
         echo "## CI Summary" > summary.md
         echo "### Infracost Report" >> summary.md
-        cat infracost.json >> summary.md
+        cat /tmp/infracost.json >> summary.md
 
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v5
