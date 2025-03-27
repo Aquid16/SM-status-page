@@ -33,6 +33,12 @@ jobs:
         aws configure set default.region "${{ secrets.AWS_DEFAULT_REGION }}"
         aws sts get-caller-identity 
 
+    - name: Set up Infracost
+      uses: infracost/actions/setup@v1
+      with:
+        api-key: ${{ secrets.INFRACOST_API_KEY }}
+      continue-on-error: true
+
     - name: Set Up Terraform
       uses: hashicorp/setup-terraform@v1
       with:
@@ -56,6 +62,17 @@ jobs:
       run: |
         cd ./terraform/statuspage_pr
         terraform plan -out=tfplan 
+    
+    - name: Generate Infracost estimate
+      run: |
+        cd ./terraform/statuspage_pr
+        infracost breakdown --path . --format json --out-file /tmp/infracost.json
+      continue-on-error: true
+
+    - name: Display Infracost estimate
+      run: |
+        infracost output --path /tmp/infracost.json
+      continue-on-error: true
 
     - name: Apply Terraform
       id: terraform_apply
