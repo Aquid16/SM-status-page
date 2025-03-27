@@ -7,6 +7,7 @@ on:
       - Development
     paths:
       - 'docker/**'
+      - 'terraform/statuspage_pr/**'
 jobs:
   ci:
     runs-on: ubuntu-latest
@@ -125,6 +126,24 @@ jobs:
         docker compose build
         docker tag docker-nginx 992382545251.dkr.ecr.us-east-1.amazonaws.com/sm-statuspage-test-repo:nginx
         docker tag docker-django 992382545251.dkr.ecr.us-east-1.amazonaws.com/sm-statuspage-test-repo:django
+         
+         # Run Trivy Security Scanning on Nginx Image
+         - name: Run Trivy on Nginx Image
+           uses: aquasecurity/trivy-action@master
+           with:
+             image-ref: 'docker:docker-nginx'
+             format: 'table'
+             exit-code: 1
+             severity: 'CRITICAL,HIGH'
+     
+         # Run Trivy Security Scanning on Django Image
+         - name: Run Trivy on Django Image
+           uses: aquasecurity/trivy-action@master
+           with:
+             image-ref: 'docker:docker-django'
+             format: 'table'
+             exit-code: 1
+             severity: 'CRITICAL,HIGH'
         docker push 992382545251.dkr.ecr.us-east-1.amazonaws.com/sm-statuspage-test-repo:nginx
         docker push 992382545251.dkr.ecr.us-east-1.amazonaws.com/sm-statuspage-test-repo:django
 
