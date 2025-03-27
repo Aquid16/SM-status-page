@@ -257,10 +257,25 @@ jobs:
         cd ./terraform/statuspage_pr
         terraform destroy -auto-approve -input=false 
 
-    - name: Trigger CD
+    - name: Generate Summary
       run: |
-        curl -X POST \
-        -H "Authorization: Bearer ${{ secrets.GH_TOKEN }}" \
-        -H "Accept: application/vnd.github.v3+json" \
-        -d '{"ref":"main"}' \
-        https://api.github.com/repos/${{ github.repository }}/actions/workflows/status-page-cd.yml/dispatches
+        echo "## CI Summary" > summary.md
+        echo "### Infracost Report" >> summary.md
+        cat infracost.json >> summary.md
+
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v5
+      with:
+        branch: ci-results
+        title: "CI Results for Review"
+        body: "This PR contains CI results including Infracost analysis. Please review and approve to trigger the CD pipeline."
+        base: main
+        delete-branch: true
+
+    # - name: Trigger CD
+    #   run: |
+    #     curl -X POST \
+    #     -H "Authorization: Bearer ${{ secrets.GH_TOKEN }}" \
+    #     -H "Accept: application/vnd.github.v3+json" \
+    #     -d '{"ref":"main"}' \
+    #     https://api.github.com/repos/${{ github.repository }}/actions/workflows/status-page-cd.yml/dispatches
