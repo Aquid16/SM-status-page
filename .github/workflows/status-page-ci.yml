@@ -289,7 +289,12 @@ jobs:
         echo "### Infracost Report" >> summary.md
         cat /tmp/infracost.json >> summary.md
 
-    - name: Create Pull Request
+    - name: Set up Git user
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+    - name: Create Pull Request with CI results
       uses: peter-evans/create-pull-request@v5
       with:
         branch: ci-results
@@ -297,6 +302,8 @@ jobs:
         body: "This PR contains CI results including Infracost analysis. Please review and approve to trigger the CD pipeline."
         base: main
         delete-branch: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     # - name: Trigger CD
     #   run: |
