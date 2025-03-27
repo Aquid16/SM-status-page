@@ -7,6 +7,11 @@ metadata:
     app: django
 spec:
   replicas: {{ .Values.django.replicas }}
+  strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: 1
+    maxUnavailable: 1
   selector:
     matchLabels:
       app: django
