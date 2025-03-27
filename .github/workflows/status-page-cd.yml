@@ -1,10 +1,14 @@
 name: Status Page CD Workflow
 
 on:
-  workflow_dispatch:  # Only triggers manually via GitHub Actions UI
+  pull_request:
+    types:
+      - closed  # Runs only when a PR is merged
+  workflow_dispatch: # Allows manual triggering
 
 jobs:
   cd:
+    if: github.event.pull_request.merged == true && github.base_ref == 'main'
     runs-on: ubuntu-latest
     steps:
     # Checkout repository
@@ -48,6 +52,22 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y docker-compose-plugin
         docker compose version || { echo "Error: Docker Compose plugin installation failed"; exit 1; }
+
+      # Delete Old Images from ECR
+    - name: Delete Old Images from ECR
+      run: |
+        set -e
+        REPO_NAME="992382545251.dkr.ecr.us-east-1.amazonaws.com/sharon-meital/statuspage"
+
+        # Get image digests
+        IMAGE_DIGESTS=$(aws ecr list-images --repository-name sharon-meital/statuspage --query 'imageIds[*].imageDigest' --output text)
+
+        # Delete all existing images
+        if [[ ! -z "$IMAGE_DIGESTS" ]]; then
+          for DIGEST in $IMAGE_DIGESTS; do
+            aws ecr batch-delete-image --repository-name sharon-meital/statuspage --image-ids imageDigest=$DIGEST || true
+          done
+        fi
 
     # Build and Push Docker Images to ECR
     - name: Build and Push Docker Images to ECR
