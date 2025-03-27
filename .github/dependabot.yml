@@ -24,3 +24,9 @@ updates:
       interval: "weekly"
     target-branch: "Development"
 
+  - package-ecosystem: "helm"
+    directory: "/Helm"
+    schedule:
+      interval: "weekly"
+    target-branch: "Development"
+
