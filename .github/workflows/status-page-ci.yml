@@ -257,10 +257,10 @@ jobs:
         cd ./terraform/statuspage_pr
         terraform destroy -auto-approve -input=false 
 
-    # - name: Trigger CD
-    #   run: |
-    #     curl -X POST \
-    #     -H "Authorization: Bearer ${{ secrets.GH_TOKEN }}" \
-    #     -H "Accept: application/vnd.github.v3+json" \
-    #     -d '{"ref":"main"}' \
-    #     https://api.github.com/repos/${{ github.repository }}/actions/workflows/status-page-cd.yml/dispatches
+    - name: Trigger CD
+      run: |
+        curl -X POST \
+        -H "Authorization: Bearer ${{ secrets.GH_TOKEN }}" \
+        -H "Accept: application/vnd.github.v3+json" \
+        -d '{"ref":"main"}' \
+        https://api.github.com/repos/${{ github.repository }}/actions/workflows/status-page-cd.yml/dispatches
