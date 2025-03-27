@@ -230,7 +230,8 @@ jobs:
       run: |
         ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i bastion_key.pem ubuntu@${{ env.BASTION_IP }} << 'EOF'
           helm uninstall redis -n development
-          helm uninstall status-page -n development  # Uninstalls all Helm releases
+          helm uninstall status-page -n development
+          kubectl delete pvc redis-data-redis-0 -n development
         EOF
         
     - name: Destroy Terraform
