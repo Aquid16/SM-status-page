@@ -8,6 +8,7 @@ on:
     paths:
       - 'docker/**'
       - 'terraform/statuspage_pr/**'
+      - 'Helm/statuspage_pr/**'
 jobs:
   ci:
     runs-on: ubuntu-latest
