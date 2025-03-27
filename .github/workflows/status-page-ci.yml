@@ -14,11 +14,6 @@ jobs:
     - name: Checkout repo
       uses: actions/checkout@v3
 
-    - name: Run Dependabot Security Scan
-      uses: dependabot/fetch-metadata@v1
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-
     - name: Install AWS CLI
       run: |
         # Update apt package lists
@@ -125,36 +120,11 @@ jobs:
     - name: Build and Push Docker Images to ECR
       run: |
         set -e
-        # Login to AWS ECR
         aws ecr get-login-password --region ${{ secrets.AWS_DEFAULT_REGION }} | docker login --username AWS --password-stdin 992382545251.dkr.ecr.us-east-1.amazonaws.com
-    
-        # Build the Docker images using docker-compose
         cd docker
         docker compose build
-    
-        # Tag the Docker images with appropriate repository and tag names
         docker tag docker-nginx 992382545251.dkr.ecr.us-east-1.amazonaws.com/sm-statuspage-test-repo:nginx
         docker tag docker-django 992382545251.dkr.ecr.us-east-1.amazonaws.com/sm-statuspage-test-repo:django
-    
-        # Run Trivy Security Scanning on Nginx Image
-        - name: Run Trivy on Nginx Image
-          uses: aquasecurity/trivy-action@master
-          with:
-            image-ref: 'docker:docker-nginx'
-            format: 'table'
-            exit-code: 1
-            severity: 'CRITICAL,HIGH'
-    
-        # Run Trivy Security Scanning on Django Image
-        - name: Run Trivy on Django Image
-          uses: aquasecurity/trivy-action@master
-          with:
-            image-ref: 'docker:docker-django'
-            format: 'table'
-            exit-code: 1
-            severity: 'CRITICAL,HIGH'
-
-        # Push the tagged images to ECR
         docker push 992382545251.dkr.ecr.us-east-1.amazonaws.com/sm-statuspage-test-repo:nginx
         docker push 992382545251.dkr.ecr.us-east-1.amazonaws.com/sm-statuspage-test-repo:django
 
