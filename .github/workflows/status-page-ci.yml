@@ -94,7 +94,7 @@ jobs:
         cd ./terraform/statuspage_pr
         terraform apply -auto-approve -input=false tfplan
 
-    - name: Get EFS ID anf Bastion Host IP
+    - name: Get EFS ID and Bastion Host IP
       run: |        
 
         EFS_ID=$(aws efs describe-file-systems --query "FileSystems[?Tags[?Key=='Name' && Value=='sm-efs-test']].FileSystemId | [0]" --output text | tr -d '\n' | tr -d '\r')
