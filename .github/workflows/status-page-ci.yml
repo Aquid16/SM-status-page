@@ -348,6 +348,25 @@ jobs:
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
+    - name: Set up Git LFS
+      run: |
+        # Install Git LFS
+        git lfs install
+
+    - name: Track large files with Git LFS
+      run: |
+        # Track large files like .zip and .db files
+        git lfs track "*.zip"
+        git lfs track "*.db"
+        # Add .gitattributes to the repo
+        git add .gitattributes
+        git commit -m "Track large files using Git LFS"
+
+    - name: Push changes to GitHub
+      run: |
+        # Push the changes to the ci-results branch
+        git push --force-with-lease origin ci-results:refs/heads/ci-results
+
     - name: Create Pull Request with CI results
       uses: peter-evans/create-pull-request@v5
       with:
