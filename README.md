@@ -13,8 +13,8 @@ Gunicorn: WSGI HTTP server for running the Django application.
 Django App: The core application handling requests and serving responses.
 Redis: In-memory data store for caching and session management.
 PostgreSQL (RDS): Relational database for persistent data storage.
-Additionally, the following tools are used for monitoring and logging:
 
+Additionally, the following tools are used for monitoring and logging:
 Prometheus + AlertManager: Collects metrics and sends alerts.
 Grafana: Visualizes metrics and logs.
 Fluentbit: Collects and forwards logs to Grafana Loki.
