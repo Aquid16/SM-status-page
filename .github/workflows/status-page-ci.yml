@@ -372,7 +372,7 @@ jobs:
     - name: Create Pull Request with CI results
       uses: peter-evans/create-pull-request@v5
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.GH_TOKEN_PAT }}
         branch: ci-results
         title: "CI Results for Review"
         body: "This PR contains CI results including Infracost analysis. Please review and approve to trigger the CD pipeline."
