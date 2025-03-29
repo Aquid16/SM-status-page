@@ -36,3 +36,11 @@ nginx:
 volumes:
   static_files:
     size: 5Gi
+
+# PVC 
+pvc:
+  storageClassName: efs-sc
+
+# Ingress
+ingress:
+  host: sm-status-page.com

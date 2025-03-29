@@ -12,6 +12,9 @@ redis:
     timeout: "5s"
     retries: 5
 
+storageclass:
+  name: ebs-sc
+
 # Volumes
 volumes:
   redis_data:
