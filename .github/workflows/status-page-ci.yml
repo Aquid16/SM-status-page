@@ -40,6 +40,14 @@ jobs:
       with:
         api-key: ${{ secrets.INFRACOST_API_KEY }}
 
+    - name: Set Up Terraform
+      uses: hashicorp/setup-terraform@v1
+      with:
+        terraform_version: latest
+
+    - name: Check Terraform version
+      run: terraform version
+
     - name: Calculate Infracost Estimate for Production
       run: |
         for dir in access_entries bastion efs eks rds security_groups vpc; do
@@ -57,14 +65,6 @@ jobs:
           echo "Cost estimate for $dir:"
           infracost output --path /tmp/infracost-$dir.json
         done
-
-    - name: Set Up Terraform
-      uses: hashicorp/setup-terraform@v1
-      with:
-        terraform_version: latest
-
-    - name: Check Terraform version
-      run: terraform version
 
     - name: Create terraform.tfvars file
       run: |
