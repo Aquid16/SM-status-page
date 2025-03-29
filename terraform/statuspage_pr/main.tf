@@ -37,18 +37,6 @@ data "aws_security_group" "sg" {
   }
 }
 
-#data "aws_instance" "bastion" {
-#  filter {
-#    name   = "vpc-id"
-#    values = [data.aws_vpc.sm_statuspage.id]
-#  }
-
-#  filter {
-#    name   = "tag:Name"
-#    values = ["sm-bastion-host"]
-#  }
-#}
-
 # Create a Private ECR Repository
 resource "aws_ecr_repository" "statuspage_repo" {
   name = "sm-statuspage-test-repo"
@@ -111,18 +99,20 @@ resource "aws_db_subnet_group" "statuspage_subnet_group" {
   description = "Subnet group for StatusPage RDS instance sm-test"
 }
 
-#resource "aws_efs_file_system" "statuspage_efs" {
-#  creation_token = "sm-efs-test"
-#  encrypted      = true
-#  tags = {
-#    Name = "sm-efs-test"
-#  }
-#}
+
+# EFS 
+resource "aws_efs_file_system" "statuspage_efs" {
+  creation_token = "sm-efs-test"
+  encrypted      = true
+  tags = {
+    Name = "sm-efs-test"
+  }
+}
 
 # EFS Mount Targets
-#resource "aws_efs_mount_target" "efs_mount_test" {
-#  count           = length(data.aws_subnets.private.ids)
-#  file_system_id  = aws_efs_file_system.statuspage_efs.id
-#  subnet_id       = data.aws_subnets.private.ids[count.index]
-#  security_groups = [data.aws_security_group.sg.id]
-#}
+resource "aws_efs_mount_target" "efs_mount_test" {
+  count           = length(data.aws_subnets.private.ids)
+  file_system_id  = aws_efs_file_system.statuspage_efs.id
+  subnet_id       = data.aws_subnets.private.ids[count.index]
+  security_groups = [data.aws_security_group.sg.id]
+}
