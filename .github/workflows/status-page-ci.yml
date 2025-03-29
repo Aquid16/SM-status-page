@@ -64,6 +64,7 @@ jobs:
           infracost breakdown --path . --format json --out-file /tmp/infracost-$dir.json
           cd - > /dev/null
         done
+      continue-on-error: true
 
     - name: Display Infracost Estimates
       run: |
@@ -71,6 +72,7 @@ jobs:
           echo "Cost estimate for $dir:"
           infracost output --path /tmp/infracost-$dir.json
         done
+      continue-on-error: true
 
     - name: Create terraform.tfvars file
       run: |
@@ -342,6 +344,7 @@ jobs:
           infracost output --path /tmp/infracost-$dir.json >> summary.md
           echo "" >> summary.md
         done
+      continue-on-error: true
           
     - name: Set up Git user
       run: |
