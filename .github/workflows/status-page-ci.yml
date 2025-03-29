@@ -190,32 +190,41 @@ jobs:
     - name: Update and Install Helm Charts via Bastion
       id: helm_install
       run: |
-        ssh -i bastion_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@${{ env.BASTION_IP }} << 'EOF'
-        cd /home/ubuntu/helm-charts/test
+        ssh -i bastion_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@${{ env.BASTION_IP }} << EOF
+          export EFS_ID=${{ env.EFS_ID }}
+          echo "Using EFS_ID: \$EFS_ID"
+    
+          cd /home/ubuntu/helm-charts/test
+    
+          kubectl create namespace development --dry-run=client -o yaml | kubectl apply -f -
+    
+          helm install redis ./redis-stack -n development \
+            --set redis.replicas=1 \
+            --set storageclass.name=ebs-sc-test \
+            --set namespace=development
 
-        kubectl create namespace development --dry-run=client -o yaml | kubectl apply -f -
-        
-        helm install redis ./redis-stack -n development --set redis.replicas=1 --set storageclass.name=ebs-sc-test --set namespace=development
-
-        helm install efs ./efs-sc-stack -n development \
-          --set namespace=development \
-          --set efs.name=efs-sc-test \
-          --set efs.fileSystemId=$EFS_ID
-        
-        helm install status-page ./status-page-stack -n development \
-          --set namespace=development \
-          --set django.image.repository=992382545251.dkr.ecr.us-east-1.amazonaws.com/sm-statuspage-test-repo \
-          --set django.env.DATABASE_HOST=sm-statuspage-test-db.cx248m4we6k7.us-east-1.rds.amazonaws.com \
-          --set django.replicas=1 \
-          --set nginx.image.repository=992382545251.dkr.ecr.us-east-1.amazonaws.com/sm-statuspage-test-repo \
-          --set nginx.replicas=1 \
-          --set pvc.storageClassName=efs-sc-test \
-          --set ingress.host=test.sm-status-page.com
-
-        sleep 30 
-        ALB_HOSTNAME=$(kubectl get ingress -n production status-page-ingress -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
-        echo "ALB_HOSTNAME=$ALB_HOSTNAME" > /home/ubuntu/alb_hostname.txt
+          echo "Before EFS install, EFS_ID is: \$EFS_ID"
+          
+          helm install efs ./efs-sc-stack -n development \
+            --set namespace=development \
+            --set efs.name=efs-sc-test \
+            --set efs.fileSystemId=\$EFS_ID
+    
+          helm install status-page ./status-page-stack -n development \
+            --set namespace=development \
+            --set django.image.repository=992382545251.dkr.ecr.us-east-1.amazonaws.com/sm-statuspage-test-repo \
+            --set django.env.DATABASE_HOST=sm-statuspage-test-db.cx248m4we6k7.us-east-1.rds.amazonaws.com \
+            --set django.replicas=1 \
+            --set nginx.image.repository=992382545251.dkr.ecr.us-east-1.amazonaws.com/sm-statuspage-test-repo \
+            --set nginx.replicas=1 \
+            --set pvc.storageClassName=efs-sc-test \
+            --set ingress.host=test.sm-status-page.com
+    
+          sleep 30 
+          ALB_HOSTNAME=\$(kubectl get ingress -n development status-page-ingress -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+          echo "ALB_HOSTNAME=\$ALB_HOSTNAME" > /home/ubuntu/alb_hostname.txt
         EOF
+
 
     - name: Fetch ALB Hostname from Bastion
       run: |
