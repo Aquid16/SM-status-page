@@ -39,7 +39,24 @@ jobs:
       uses: infracost/actions/setup@v1
       with:
         api-key: ${{ secrets.INFRACOST_API_KEY }}
-      continue-on-error: true
+
+    - name: Calculate Infracost Estimate for Production
+      run: |
+        for dir in access_entries bastion efs eks rds security_groups vpc; do
+          echo "Processing $dir..."
+          cd terraform/production/infrastructure/$dir
+          terraform init
+          terraform plan -out=tfplan
+          infracost breakdown --path . --format json --out-file /tmp/infracost-$dir.json
+          cd - > /dev/null
+        done
+
+    - name: Display Infracost Estimates
+      run: |
+        for dir in access_entries bastion efs eks rds security_groups vpc; do
+          echo "Cost estimate for $dir:"
+          infracost output --path /tmp/infracost-$dir.json
+        done
 
     - name: Set Up Terraform
       uses: hashicorp/setup-terraform@v1
@@ -64,17 +81,6 @@ jobs:
       run: |
         cd ./terraform/statuspage_pr
         terraform plan -out=tfplan 
-    
-    - name: Generate Infracost estimate
-      run: |
-        cd ./terraform/statuspage_pr
-        infracost breakdown --path . --format json --out-file /tmp/infracost.json
-      continue-on-error: true
-
-    - name: Display Infracost estimate
-      run: |
-        infracost output --path /tmp/infracost.json
-      continue-on-error: true
 
     - name: Apply Terraform
       id: terraform_apply
@@ -82,8 +88,18 @@ jobs:
         cd ./terraform/statuspage_pr
         terraform apply -auto-approve -input=false tfplan
 
-    - name: Get Bastion Host IP
+    - name: Get EFS ID anf Bastion Host IP
       run: |        
+
+        EFS_ID=$(aws efs describe-file-systems --query "FileSystems[?Tags[?Key=='Name' && Value=='sm-efs-test']].FileSystemId | [0]" --output text | tr -d '\n' | tr -d '\r')
+        if [ -z "$EFS_ID" ]; then
+          echo "Error: EFS_ID is empty; no EFS found with tag Name=sm-efs-test"
+          exit 1
+        fi
+
+        echo "EFS_ID=$EFS_ID" >> $GITHUB_ENV
+        echo "Debug: EFS_ID=$EFS_ID"
+      
         BASTION_IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=sm-bastion-host" "Name=instance-state-name,Values=running" --query "Reservations[0].Instances[0].PublicIpAddress" --output text | tr -d '\n' | tr -d '\r')
         if [ -z "$BASTION_IP" ]; then
           echo "Error: BASTION_IP is empty; no instance found with tag Name=sm-bastion-host"
@@ -168,19 +184,35 @@ jobs:
         # Remove existing helm-charts directory on bastion to avoid old file leftovers
         ssh -i bastion_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@${{ env.BASTION_IP }} "rm -rf /home/ubuntu/helm-charts"
         # Copy the latest Helm charts
-        scp -i bastion_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r ./Helm/statuspage_pr ubuntu@${{ env.BASTION_IP }}:/home/ubuntu/helm-charts
+        scp -i bastion_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r ./Helm/production ubuntu@${{ env.BASTION_IP }}:/home/ubuntu/helm-charts/test
         
     - name: Update and Install Helm Charts via Bastion
       id: helm_install
       run: |
         ssh -i bastion_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@${{ env.BASTION_IP }} << 'EOF'
-        cd /home/ubuntu/helm-charts
+        cd /home/ubuntu/helm-charts/test
 
         kubectl create namespace development --dry-run=client -o yaml | kubectl apply -f -
-        helm install redis ./redis-stack -n development
-        helm install status-page ./status-page-stack -n development
+        
+        helm install redis ./redis-stack -n development --set redis.replicas=1 --set storageclass.name=ebs-sc-test --set namespace=development
+
+        helm install efs ./efs-sc-stack -n development \
+          --set namespace=development \
+          --set efs.name=efs-sc-test \
+          --set efs.fileSystemId=$EFS_ID
+        
+        helm install status-page ./status-page-stack -n development \
+          --set namespace=development \
+          --set django.image.repository=992382545251.dkr.ecr.us-east-1.amazonaws.com/sm-statuspage-test-repo \
+          --set django.env.DATABASE_HOST=sm-statuspage-test-db.cx248m4we6k7.us-east-1.rds.amazonaws.com \
+          --set django.replicas=1 \
+          --set nginx.image.repository=992382545251.dkr.ecr.us-east-1.amazonaws.com/sm-statuspage-test-repo \
+          --set nginx.replicas=1 \
+          --set pvc.storageClassName=efs-sc-test \
+          --set ingress.host=test.sm-status-page.com
+
         sleep 30 
-        ALB_HOSTNAME=$(kubectl get ingress -n development status-page-test-ingress -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+        ALB_HOSTNAME=$(kubectl get ingress -n production status-page-ingress -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
         echo "ALB_HOSTNAME=$ALB_HOSTNAME" > /home/ubuntu/alb_hostname.txt
         EOF
 
@@ -274,6 +306,7 @@ jobs:
       run: |
         ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i bastion_key.pem ubuntu@${{ env.BASTION_IP }} << 'EOF'
           helm uninstall redis -n development
+          helm uninstall efs -n development
           helm uninstall status-page -n development
           kubectl delete pvc redis-data-redis-0 -n development
         EOF
