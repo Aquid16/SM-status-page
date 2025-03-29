@@ -63,12 +63,6 @@ resource "aws_security_group" "bastion_sg" {
   }
 }
 
-output "bastion_sg_id" {
-  description = "ID of the Bastion security group"
-  value       = aws_security_group.bastion_sg.id
-}
-
-
 
 resource "aws_security_group" "admin_sg" {
   vpc_id = data.terraform_remote_state.vpc.outputs.vpc_id
