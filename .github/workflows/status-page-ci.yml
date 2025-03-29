@@ -331,8 +331,12 @@ jobs:
       run: |
         echo "## CI Summary" > summary.md
         echo "### Infracost Report" >> summary.md
-        cat /tmp/infracost.json >> summary.md
-
+        for dir in vpc security_groups efs eks access_entries rds; do
+          echo "### $dir Infracost Report" >> summary.md
+          infracost output --path /tmp/infracost-$dir.json >> summary.md
+          echo "" >> summary.md
+        done
+          
     - name: Set up Git user
       run: |
         git config --global user.name "github-actions[bot]"
