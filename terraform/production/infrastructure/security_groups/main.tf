@@ -121,6 +121,8 @@ resource "aws_security_group" "admin_sg" {
     Name  = "sm-admin-sg"
     Owner = local.owner
   }
+  
+  depends_on = [aws_security_group.bastion_sg]
 }
 
 resource "aws_security_group" "user_sg" {
