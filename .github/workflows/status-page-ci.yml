@@ -332,7 +332,7 @@ jobs:
         echo "## CI Summary" > summary.md
         echo "### Infracost Report" >> summary.md
         for dir in vpc security_groups efs eks access_entries rds; do
-          echo "### $dir Infracost Report" >> summary.md
+          echo "#### $dir Infracost Report" >> summary.md
           infracost output --path /tmp/infracost-$dir.json >> summary.md
           echo "" >> summary.md
         done
