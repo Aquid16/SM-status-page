@@ -362,10 +362,12 @@ jobs:
         git add .gitattributes
         git commit -m "Track large files using Git LFS"
 
-    - name: Push changes to GitHub
+    - name: Create and push ci-results branch
       run: |
+        # Create the ci-results branch if it doesn't exist
+        git checkout -b ci-results || git checkout ci-results
         # Push the changes to the ci-results branch
-        git push --force-with-lease origin ci-results:refs/heads/ci-results
+        git push --set-upstream origin ci-results
 
     - name: Create Pull Request with CI results
       uses: peter-evans/create-pull-request@v5
