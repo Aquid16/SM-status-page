@@ -5,7 +5,7 @@ metadata:
   name: static-files-pvc
   namespace: {{ .Values.namespace }}
 spec:
-  storageClassName: efs-sc
+  storageClassName: {{ .Values.pvc.storageClassName }}
   accessModes:
     - ReadWriteMany
   resources:
