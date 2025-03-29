@@ -6,12 +6,19 @@ This project is a status page application for monitoring the health and performa
 The application is deployed on AWS with the following components:
 
 Elastic Load Balancer (ELB): Distributes incoming traffic to the EKS cluster.
+
 EKS Cluster: Manages the Kubernetes environment.
+
 Ingress: Routes traffic to the appropriate services within the cluster.
+
 Nginx Pod: Serves as a reverse proxy for the Django application.
+
 Gunicorn: WSGI HTTP server for running the Django application.
+
 Django App: The core application handling requests and serving responses.
+
 Redis: In-memory data store for caching and session management.
+
 PostgreSQL (RDS): Relational database for persistent data storage.
 
 Additionally, the following tools are used for monitoring and logging:
