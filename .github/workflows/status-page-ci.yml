@@ -181,7 +181,7 @@ jobs:
 
     - name: Copy Helm Charts to Bastion
       run: |
-        mkdir -p /home/ubuntu/helm-charts/test
+        ssh -i bastion_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@${{ env.BASTION_IP }} "mkdir -p /home/ubuntu/helm-charts/test"
         # Remove existing helm-charts directory on bastion to avoid old file leftovers
         ssh -i bastion_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@${{ env.BASTION_IP }} "rm -rf /home/ubuntu/helm-charts/test"
         # Copy the latest Helm charts
