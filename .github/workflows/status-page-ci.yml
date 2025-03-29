@@ -41,7 +41,7 @@ jobs:
         api-key: ${{ secrets.INFRACOST_API_KEY }}
 
     - name: Set Up Terraform
-      uses: hashicorp/setup-terraform@v1
+      uses: hashicorp/setup-terraform@v3
       with:
         terraform_version: latest
 
