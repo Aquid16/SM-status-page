@@ -8,4 +8,4 @@ parameters:
   fileSystemId: {{ .Values.efs.fileSystemId }}
   directoryPerms: "700"
 reclaimPolicy: Retain
-volumeBindingMode: Immediate
+volumeBindingMode: WaitForFirstConsumer
