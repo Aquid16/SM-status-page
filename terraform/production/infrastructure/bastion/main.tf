@@ -23,7 +23,8 @@ data "terraform_remote_state" "vpc" {
 }
 
 data "terraform_remote_state" "security_groups" {
-  backend = "s3" {
+  backend = "s3"
+  config = {
     bucket = "sharon-meital-terraform-state-bucket"
     key    = "security_groups/terraform.tfstate"
     region = "us-east-1"
@@ -31,7 +32,8 @@ data "terraform_remote_state" "security_groups" {
 }
 
 data "terraform_remote_state" "efs" {
-  backend = "s3" {
+  backend = "s3"
+  config = {
     bucket = "sharon-meital-terraform-state-bucket"
     key    = "efs/terraform.tfstate"
     region = "us-east-1"
@@ -39,7 +41,8 @@ data "terraform_remote_state" "efs" {
 }
 
 data "terraform_remote_state" "eks" {
-  backend = "s3" {
+  backend = "s3"
+  config = {
     bucket = "sharon-meital-terraform-state-bucket"
     key    = "eks/terraform.tfstate"
     region = "us-east-1"
@@ -88,9 +91,9 @@ resource "aws_instance" "bastion" {
               ./get_helm.sh
 
               # Retrieve AWS credentials from Secrets Manager
-              SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id <your-secret-id> --region us-east-1 | jq -r .SecretString)
-              AWS_ACCESS_KEY_ID=$(echo $SECRET_JSON | jq -r .aws_access_key_id)
-              AWS_SECRET_ACCESS_KEY=$(echo $SECRET_JSON | jq -r .aws_secret_access_key)
+              SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id arn:aws:secretsmanager:us-east-1:992382545251:secret:sm-aws-r2jPRG --region us-east-1 | jq -r .SecretString)
+              AWS_ACCESS_KEY_ID=$(echo $SECRET_JSON | jq -r .AWS_ACCESS_KEY_ID)
+              AWS_SECRET_ACCESS_KEY=$(echo $SECRET_JSON | jq -r .AWS_SECRET_ACCESS_KEY)
 
               # Configure AWS CLI with the retrieved credentials
               aws configure set aws_access_key_id "$AWS_ACCESS_KEY_ID"
@@ -128,17 +131,16 @@ resource "aws_instance" "bastion" {
               ./create-alb-irsa.sh
 
               # Install Helm charts from the Git repository - status page
+              helm install redis redis-stack
               helm install efs efs-sc-stack --set fileSystemId=${data.terraform_remote_state.efs.outputs.efs_id}
               helm install status-page status-page-stack
-              EOF
 
               # Install Helm charts from the Git repository - observability
-              cd ~/SM-status-page/Helm/observability/observability-stack
+              cd -
+              cd SM-status-page/Helm/observability/observability-stack
               helm install observability ./ -f values.yaml -f values-loki.yaml -f values-fluent-bit.yaml --namespace observability --create-namespace
               EOF
               
-
-
   tags = {
     Name = "sm-bastion-host"
     Owner = local.owner
@@ -177,7 +179,7 @@ resource "aws_route53_record" "sm_status_page" {
 }
 
 # Create the Route 53 A record with alias to ALB - grafana
-resource "aws_route53_record" "sm_status_page" {
+resource "aws_route53_record" "grafana_sm_status_page" {
   zone_id = data.aws_route53_zone.status_page.zone_id
   name    = "grafana.sm-status-page.com"
   type    = "A"
