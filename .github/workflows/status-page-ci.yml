@@ -12,7 +12,7 @@ on:
     paths:
       - 'docker/**'
       - 'terraform/statuspage_pr/**'
-      - 'Helm/statuspage_pr/**'
+      - 'Helm/**'
 jobs:
   ci:
     runs-on: ubuntu-latest
