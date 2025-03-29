@@ -50,7 +50,7 @@ jobs:
 
     - name: Calculate Infracost Estimate for Production
       run: |
-        for dir in vpc security_groups efs eks access_entries rds bastion; do
+        for dir in vpc efs eks access_entries rds bastion; do
           echo "Processing $dir..."
           cd terraform/production/infrastructure/$dir
           terraform init
