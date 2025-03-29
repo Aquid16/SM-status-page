@@ -1,5 +1,9 @@
 name: Status Page CI Workflow
 
+permissions:
+  contents: write
+  pull-requests: write
+
 on: 
   workflow_dispatch:
   push:
@@ -15,6 +19,8 @@ jobs:
     steps:
     - name: Checkout repo
       uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
 
     - name: Install AWS CLI
       run: |
@@ -345,13 +351,14 @@ jobs:
     - name: Create Pull Request with CI results
       uses: peter-evans/create-pull-request@v5
       with:
+        token: ${{ secrets.GITHUB_TOKEN }}
         branch: ci-results
         title: "CI Results for Review"
         body: "This PR contains CI results including Infracost analysis. Please review and approve to trigger the CD pipeline."
         base: main
         delete-branch: true
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # env:
+      #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     # - name: Trigger CD
     #   run: |
