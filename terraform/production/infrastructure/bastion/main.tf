@@ -1,5 +1,3 @@
-# Bastion Host Security Group
-
 provider "aws" {
   region = "us-east-1"
 }
@@ -74,6 +72,9 @@ resource "aws_instance" "bastion" {
   user_data = <<-EOF
               #!/bin/bash
 
+              # Switch to the home directory of ubuntu user
+              cd /home/ubuntu
+
               # Update the package list
               sudo apt-get update -y
               
@@ -90,35 +91,34 @@ resource "aws_instance" "bastion" {
               chmod 700 get_helm.sh
               ./get_helm.sh
 
-              # Retrieve AWS credentials from Secrets Manager
-              SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id arn:aws:secretsmanager:us-east-1:992382545251:secret:sm-aws-r2jPRG --region us-east-1 | jq -r .SecretString)
-              AWS_ACCESS_KEY_ID=$(echo $SECRET_JSON | jq -r .AWS_ACCESS_KEY_ID)
-              AWS_SECRET_ACCESS_KEY=$(echo $SECRET_JSON | jq -r .AWS_SECRET_ACCESS_KEY)
-
-              # Configure AWS CLI with the retrieved credentials
-              aws configure set aws_access_key_id "$AWS_ACCESS_KEY_ID"
-              aws configure set aws_secret_access_key "$AWS_SECRET_ACCESS_KEY"
-              aws configure set region "us-east-1"
+              # Configure AWS CLI with credentials from Terraform variables
+              mkdir -p /home/ubuntu/.aws
+              echo "[default]" > /home/ubuntu/.aws/credentials
+              echo "aws_access_key_id = ${var.aws_access_key}" >> /home/ubuntu/.aws/credentials
+              echo "aws_secret_access_key = ${var.aws_secret_key}" >> /home/ubuntu/.aws/credentials
+              echo "region = us-east-1" >> /home/ubuntu/.aws/credentials
+              chown ubuntu:ubuntu /home/ubuntu/.aws/credentials
+              chmod 600 /home/ubuntu/.aws/credentials
+              aws sts get-caller-identity
 
               # Wait for EKS and configure kubeconfig
-              aws eks update-kubeconfig --region us-east-1 --name ${data.terraform_remote_state.eks.outputs.cluster_name}
-
+              sudo -u ubuntu aws eks update-kubeconfig --region us-east-1 --name sm-statuspage-eks
               # Create the production namespace and set it as default
-              kubectl create namespace production
-              kubectl config set-context --current --namespace=production
+              sudo -u ubuntu kubectl create namespace production
+              sudo -u ubuntu kubectl config set-context --current --namespace=production
 
               # Add Helm repositories for EBS and EFS drivers
-              helm repo add aws-ebs-csi-driver https://kubernetes-sigs.github.io/aws-ebs-csi-driver
-              helm repo add aws-efs-csi-driver https://kubernetes-sigs.github.io/aws-efs-csi-driver/
-              helm repo update
+              sudo -u ubuntu helm repo add aws-ebs-csi-driver https://kubernetes-sigs.github.io/aws-ebs-csi-driver
+              sudo -u ubuntu helm repo add aws-efs-csi-driver https://kubernetes-sigs.github.io/aws-efs-csi-driver/
+              sudo -u ubuntu helm repo update
 
               # Install AWS EBS CSI Driver
-              helm install ebs-csi aws-ebs-csi-driver/aws-ebs-csi-driver \
+              sudo -u ubuntu helm install ebs-csi aws-ebs-csi-driver/aws-ebs-csi-driver \
                 --namespace kube-system \
                 --set controller.serviceAccount.create=true
 
               # Install AWS EFS CSI Driver
-              helm install efs-csi aws-efs-csi-driver/aws-efs-csi-driver \
+              sudo -u ubuntu helm install efs-csi aws-efs-csi-driver/aws-efs-csi-driver \
                 --namespace kube-system \
                 --set controller.serviceAccount.create=true
 
@@ -127,68 +127,22 @@ resource "aws_instance" "bastion" {
               cd SM-status-page/Helm/production
 
               # Run the existing create-alb-irsa.sh script
-              chmod +x create-alb-irsa.sh
-              ./create-alb-irsa.sh
+              sudo -u ubuntu chmod +x create-alb-irsa.sh
+              sudo -u ubuntu ./create-alb-irsa.sh
 
               # Install Helm charts from the Git repository - status page
-              helm install redis redis-stack
-              helm install efs efs-sc-stack --set fileSystemId=${data.terraform_remote_state.efs.outputs.efs_id}
-              helm install status-page status-page-stack
+              sudo -u ubuntu helm install redis redis-stack
+              sudo -u ubuntu helm install efs efs-sc-stack --set fileSystemId=${data.terraform_remote_state.efs.outputs.efs_id}
+              sudo -u ubuntu helm install status-page status-page-stack
 
               # Install Helm charts from the Git repository - observability
               cd -
               cd SM-status-page/Helm/observability/observability-stack
-              helm install observability ./ -f values.yaml -f values-loki.yaml -f values-fluent-bit.yaml --namespace observability --create-namespace
+              sudo -u ubuntu helm install observability ./ -f values.yaml -f values-loki.yaml -f values-fluent-bit.yaml --namespace observability --create-namespace
               EOF
               
   tags = {
     Name = "sm-bastion-host"
     Owner = local.owner
   }
-}
-
-
-# Reference your existing hosted zone
-data "aws_route53_zone" "status_page" {
-  zone_id = "Z02801181XR3LNYC5CSWI"
-}
-
-# Get the specific ALB created by the ingress in production namespace
-data "aws_lb" "eks_alb" {
-  depends_on = [aws_instance.bastion]
-  tags = {
-    "elbv2.k8s.aws/cluster"       = data.terraform_remote_state.eks.outputs.cluster_name
-    "ingress.k8s.aws/namespace"   = "production"  # Match the namespace from your user_data
-    "ingress.k8s.aws/resource"    = "LoadBalancer"
-  }
-}
-
-# Create the Route 53 A record with alias to ALB - statuspage
-resource "aws_route53_record" "sm_status_page" {
-  zone_id = data.aws_route53_zone.status_page.zone_id
-  name    = "sm-status-page.com"
-  type    = "A"
-
-  alias {
-    name                   = data.aws_lb.eks_alb.dns_name
-    zone_id                = data.aws_lb.eks_alb.zone_id
-    evaluate_target_health = true
-  }
-
-  depends_on = [data.aws_lb.eks_alb]
-}
-
-# Create the Route 53 A record with alias to ALB - grafana
-resource "aws_route53_record" "grafana_sm_status_page" {
-  zone_id = data.aws_route53_zone.status_page.zone_id
-  name    = "grafana.sm-status-page.com"
-  type    = "A"
-
-  alias {
-    name                   = data.aws_lb.eks_alb.dns_name
-    zone_id                = data.aws_lb.eks_alb.zone_id
-    evaluate_target_health = true
-  }
-
-  depends_on = [data.aws_lb.eks_alb]
 }

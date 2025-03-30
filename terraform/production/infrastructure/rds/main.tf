@@ -83,6 +83,7 @@ module "rds" {
   db_name             = var.database_name
   username            = var.username
   password            = var.password
+  create_random_password = false
   publicly_accessible = false
 
   vpc_security_group_ids = [data.terraform_remote_state.security_groups.outputs.admin_sg_id]

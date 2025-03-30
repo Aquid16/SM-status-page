@@ -74,6 +74,7 @@ module "eks" {
       subnet_ids     = data.terraform_remote_state.vpc.outputs.private_subnets
       additional_security_group_ids = [data.terraform_remote_state.security_groups.outputs.user_sg_id]
       iam_role_arn = var.node_group_role_arn
+      create_iam_role = false
     }
   }
 

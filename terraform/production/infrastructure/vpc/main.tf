@@ -57,11 +57,13 @@ module "vpc" {
   public_subnet_tags = {
     "Name" = "${var.vpc_name}-public"
     Owner = local.owner
+    "kubernetes.io/role/elb" = "1"
   }
 
   private_subnet_tags = {
     "Name" = "${var.vpc_name}-private"
     Owner = local.owner
+    "kubernetes.io/role/internal-elb" = "1"
   }
 
   public_route_table_tags = {
