@@ -49,6 +49,7 @@ To set up the environment, follow these steps:
       cd infrastructure/access_entries && terraform init && terraform apply
       cd infrastructure/rds && terraform init && terraform apply
       cd infrastructure/bastion && terraform init && terraform apply
+      cd infrastructure/alb && terraform init && terraform apply
 ```
 
 5. **Verification:**
@@ -104,6 +105,7 @@ To make changes to the application or infrastructure:
 To destroy the environment, run terraform destroy in the following order to ensure dependencies are removed correctly:
 
 ```bash
+cd infrastructure/alb && terraform destroy
 cd infrastructure/bastion && terraform destroy
 cd infrastructure/rds && terraform destroy
 cd infrastructure/access_entries && terraform destroy
