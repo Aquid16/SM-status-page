@@ -20,6 +20,12 @@ else
   echo "IAM policy exists: $POLICY_ARN"
 fi
 
+eksctl delete iamserviceaccount \
+  --cluster="sm-statuspage-eks" \
+  --namespace="kube-system" \
+  --name="aws-load-balancer-controller" \
+  --region="us-east-1"
+
 echo "Creating ServiceAccount with IRSA..."
 eksctl create iamserviceaccount \
   --cluster=$CLUSTER_NAME \
