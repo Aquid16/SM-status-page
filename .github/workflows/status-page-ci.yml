@@ -369,6 +369,13 @@ jobs:
         git add .gitattributes
         git commit -m "Track large files using Git LFS"
 
+    - name: Ensure terraform.tfvars is not included
+      run: |
+        if git ls-files --error-unmatch terraform/statuspage_pr/terraform.tfvars; then
+          echo "Error: terraform.tfvars is still tracked by Git!"
+          exit 1
+        fi
+
     - name: Create and push ci-results branch
       run: |
         # Create the ci-results branch if it doesn't exist
