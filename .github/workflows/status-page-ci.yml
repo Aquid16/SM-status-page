@@ -335,6 +335,10 @@ jobs:
         cd ./terraform/statuspage_pr
         terraform destroy -auto-approve -input=false 
 
+    - name: Remove terraform.tfvars from git staging
+      run: |
+        git reset terraform/statuspage_pr/terraform.tfvars
+
     - name: Generate Summary
       run: |
         echo "## CI Summary" > summary.md
