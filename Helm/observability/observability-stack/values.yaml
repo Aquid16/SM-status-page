@@ -1,1 +1,68 @@
 namespace: observability
+
+kube-prometheus-stack:
+  prometheus:
+    prometheusSpec:
+      image:
+        tag: "v2.55.0"
+      resources:
+        requests:
+          memory: "512Mi"
+          cpu: "500m"
+        limits:
+          memory: "2Gi"
+          cpu: "1000m"
+  grafana:
+    image:
+      tag: "11.5.2"
+    datasources:
+      datasources.yaml:
+        apiVersion: 1
+        datasources:
+        - name: Loki
+          type: loki
+          url: http://observability-loki:3100
+          access: proxy
+          isDefault: false
+
+loki:
+  singleBinary:
+    enabled: true    
+    replicas: 1      
+  persistence:
+    enabled: true
+    storageClass: "efs-sc"
+    size: 10Gi
+  config:
+    auth_enabled: false
+    server:
+      http_listen_port: 3100
+    schema_config:
+      configs:
+        - from: 2024-01-01
+          store: boltdb
+          object_store: filesystem
+          schema: v11
+          index:
+            prefix: index_
+            period: 24h
+    storage_config:
+      boltdb:
+        directory: /data/loki/index
+      filesystem:
+        directory: /data/loki/chunks
+    compactor:
+      working_directory: /data/loki/compactor
+      retention_enabled: true
+      retention_period: 30d
+    ring:
+      kvstore:
+        store: inmemory
+
+promtail:
+  enabled: true
+  image:
+    tag: "2.9.0"
+  config:
+    clients:
+      - url: http://observability-loki:3100/loki/api/v1/push

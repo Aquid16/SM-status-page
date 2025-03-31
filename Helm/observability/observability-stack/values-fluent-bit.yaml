@@ -1,8 +1,0 @@
-config:
-  outputs: |
-    [OUTPUT]
-        Name loki
-        Match *
-        Host loki.{{ .Release.Namespace }}.svc.cluster.local
-        Port 3100
-        Labels job=fluentbit
