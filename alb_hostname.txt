@@ -1,1 +1,0 @@
-ALB_HOSTNAME=sm-application-load-balancer-1479071847.us-east-1.elb.amazonaws.com
