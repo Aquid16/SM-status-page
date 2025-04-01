@@ -68,9 +68,14 @@ jobs:
 
     - name: Display Infracost Estimates
       run: |
+        echo "### Infracost Cost Estimates" > infracost_summary.md
+        echo "| Service | Monthly Cost |" >> infracost_summary.md
+        echo "|---------|-------------|" >> infracost_summary.md
+        
         for dir in vpc security_groups efs eks access_entries rds; do
           echo "Cost estimate for $dir:"
-          infracost output --path /tmp/infracost-$dir.json
+          cost=$(infracost output --path /tmp/infracost-$dir.json --format table --no-color | grep "OVERALL TOTAL" | awk '{print $3}')
+          echo "| $dir | $cost |" >> infracost_summary.md
         done
       continue-on-error: true
 
@@ -343,11 +348,7 @@ jobs:
       run: |
         echo "## CI Summary" > summary.md
         echo "### Infracost Report" >> summary.md
-        for dir in vpc security_groups efs eks access_entries rds; do
-          echo "#### $dir Infracost Report" >> summary.md
-          infracost output --path /tmp/infracost-$dir.json >> summary.md
-          echo "" >> summary.md
-        done
+        cat infracost_summary.md >> summary.md
       continue-on-error: true
           
     - name: Set up Git user
