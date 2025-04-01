@@ -1,0 +1,17 @@
+{
+  "Comment": "Removing statuspage A record",
+  "Changes": [
+    {
+      "Action": "DELETE",
+      "ResourceRecordSet": {
+        "Name": "test.sm-status-page.com",
+        "Type": "A",
+        "AliasTarget": {
+          "HostedZoneId": "Z35SXDOTRQ7X7K",
+          "DNSName": "dualstack.sm-application-load-balancer-1479071847.us-east-1.elb.amazonaws.com",
+          "EvaluateTargetHealth": true
+        }
+      }
+    }
+  ]
+}
