@@ -137,8 +137,8 @@ resource "aws_instance" "bastion" {
 
               # Install Helm charts from the Git repository - observability
               cd -
-              cd SM-status-page/Helm/observability/observability-stack
-              sudo -u ubuntu helm install observability ./ -f values.yaml -f values-loki.yaml -f values-fluent-bit.yaml --namespace observability --create-namespace
+              cd SM-status-page/Helm/observability/
+              sudo -u ubuntu helm install observability observability-stack --namespace observability --create-namespace
               EOF
               
   tags = {

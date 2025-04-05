@@ -17,11 +17,13 @@ The application is deployed on AWS with the following components:
 Additionally, the following tools are used for monitoring and logging:
 - **Prometheus + AlertManager:** Collects metrics and sends alerts.
 - **Grafana:** Visualizes metrics and logs.
-- **Fluentbit:** Collects and forwards logs to Grafana Loki.
+- **Promtail:** Collects and forwards logs to Grafana Loki.
 - **Grafana Loki:** Stores and queries logs.
 
 ### Architecture Diagram
-להוסיף תמונה
+![Architecture](assets/Architecture.png)
+**Network Architecture**:
+![NetworkArchitecture](assets/NetworkArchitecture.png)
 
 ## Setup Instructions
 To set up the environment, follow these steps:
@@ -72,10 +74,18 @@ The project includes comprehensive monitoring and logging solutions:
   - Prometheus: Collects metrics from the application and infrastructure.
   - AlertManager: Sends alerts based on predefined rules.
   - Grafana: Provides dashboards to visualize metrics.
+
 - **Logging:**
-  - Fluentbit: Collects logs from the application and system components.
+  - Promtail: Collects logs from the application and system components.
   - Grafana Loki: Stores and indexes logs.
   - Grafana: Allows querying and visualizing logs.
+
+**Dashboards:**
+- Monitoring: 
+![monitoring](assets/monitoring.png)
+- Logging:
+![logging](assets/logging.png)
+
  
 ## CI/CD Pipeline
 The project uses GitHub Actions for continuous integration and deployment. The pipeline is triggered on changes to the repository and follows these steps:
