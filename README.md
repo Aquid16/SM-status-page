@@ -22,6 +22,7 @@ Additionally, the following tools are used for monitoring and logging:
 
 ### Architecture Diagram
 ![Architecture](assets/Architecture.png)
+**Network Architecture**:
 ![NetworkArchitecture](assets/NetworkArchitecture.png)
 
 ## Setup Instructions
@@ -80,7 +81,9 @@ The project includes comprehensive monitoring and logging solutions:
   - Grafana: Allows querying and visualizing logs.
 
 **Dashboards:**
+- Monitoring: 
 ![monitoring](assets/monitoring.png)
+- Logging:
 ![logging](assets/logging.png)
 
  
