@@ -393,13 +393,3 @@ jobs:
         body: "This PR contains CI results including Infracost analysis. Please review and approve to trigger the CD pipeline."
         base: main
         delete-branch: true
-      # env:
-      #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    # - name: Trigger CD
-    #   run: |
-    #     curl -X POST \
-    #     -H "Authorization: Bearer ${{ secrets.GH_TOKEN }}" \
-    #     -H "Accept: application/vnd.github.v3+json" \
-    #     -d '{"ref":"main"}' \
-    #     https://api.github.com/repos/${{ github.repository }}/actions/workflows/status-page-cd.yml/dispatches
